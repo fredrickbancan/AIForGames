@@ -35,4 +35,6 @@ public:
 	float getPercentageToNextTick() const { return (float)percentToNextTick; }
 
 	float getNumOfTicksForSeconds(float seconds) const {return (float)(seconds * ticksPerSecond);}
+
+	int getFps() const { return FPS; }
 };
