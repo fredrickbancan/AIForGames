@@ -1,6 +1,9 @@
 #include "Game.h"
-
 Game* Game::gameInstance = nullptr;
+#include "TicksAndFPS.h"
+
+/*called every tick*/
+void onTick();
 
 Game* Game::get()
 {
@@ -11,13 +14,35 @@ Game* Game::get()
     return gameInstance;
 }
 
+void Game::close()
+{
+    if (gameInstance != nullptr)
+    {
+        delete gameInstance;
+    }
+}
+
 Game::Game()
 {
-    //constructor
+    ticksAndFps = new TicksAndFPS(30);
 }
 
 Game::~Game()
 {
-    if(gameInstance != nullptr)
-    delete gameInstance;
+    delete ticksAndFps;
+}
+
+void Game::onFrame()
+{
+    ticksAndFps->doOnTickUntillRealtimeSync(onTick);
+}
+
+void onTick()
+{
+    //TODO: impliment
+}
+
+void Game::drawScene()
+{
+    //TODO: impliment
 }
