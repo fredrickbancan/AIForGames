@@ -1,5 +1,5 @@
 #include "EntityLiving.h"
-
+#include "Game.h"
 EntityLiving::EntityLiving(float x, float y, float rotation): posX(x), posY(y), rotation(rotation), prevPosX(x), prevPosY(y), prevRotation(rotation)
 {
 	moveAcel = 1.5F;
@@ -14,7 +14,7 @@ void EntityLiving::onTick()
 {
 	prevPosX = posX;
 	prevPosY = posY;
-
+	prevRotation = rotation;
 	
 	velX += acelX;
 	velY += acelY;
@@ -22,4 +22,19 @@ void EntityLiving::onTick()
 	velY *= moveResistance;
 	posX += velX;
 	posY += velY;
+}
+
+float EntityLiving::getLerpPosX() const
+{
+	return Game::get()->lerp(prevPosX, posX);
+}
+
+float EntityLiving::getLerpPosY() const
+{
+	return Game::get()->lerp(prevPosY, posY);
+}
+
+float EntityLiving::getLerpRotation() const
+{
+	return Game::get()->lerp(prevRotation, rotation);
 }

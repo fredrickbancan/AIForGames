@@ -1,6 +1,6 @@
 #include "TicksAndFPS.h"
 #include <chrono>
-
+#include "Game.h"
 long long TicksAndFPS::getRealTimeMS()
 {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
@@ -30,7 +30,7 @@ void TicksAndFPS::updateFPS()
     frames++;
 }
 
-void TicksAndFPS::doOnTickUntillRealtimeSync(void(*onTickFunc)())
+void TicksAndFPS::doOnTickUntillRealtimeSync(class Game* instance)
 {
     if (paused)
     {
@@ -42,7 +42,7 @@ void TicksAndFPS::doOnTickUntillRealtimeSync(void(*onTickFunc)())
     }
     while ((applicationTime + msPerTick) < getRealTimeMS())
     {
-        onTickFunc();
+        instance->onTick();
         applicationTime += (long)msPerTick;
     }
     percentToNextTick = (double)(getRealTimeMS() - applicationTime) / msPerTick;

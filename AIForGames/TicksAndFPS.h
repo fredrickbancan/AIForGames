@@ -27,7 +27,7 @@ public:
 	void updateFPS();
 
 	/*runs the provided onTick function repeatidly untill application has synced with realtime*/
-	void doOnTickUntillRealtimeSync(void(* onTickFunc)());
+	void doOnTickUntillRealtimeSync(class Game* instance);
 
 	void pause() { paused = true; }
 	void unPause() { paused = false; }

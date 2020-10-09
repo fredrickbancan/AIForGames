@@ -15,11 +15,15 @@ public:
 	/*called every tick to do stuff to entity*/
 	void onTick();
 
-	void setPos(float x, float y);
+	void setPos(float x, float y) { posX = x; posY = y; }
 
-	void setRotation(float r);
+	void setRotation(float r) { rotation = r; }
 
-	float getPosX() const { return posX; };
-	float getPosY() const { return posY; };
-	float getRotation() const { return rotation; };
+	float getPosX() const { return posX; }
+	float getPosY() const { return posY; }
+	float getRotation() const { return rotation; }
+
+	float getLerpPosX() const;//returns the posX of this entity linearly interpolated between ticks
+	float getLerpPosY() const;//returns the posY of this entity linearly interpolated between ticks
+	float getLerpRotation() const;//returns the rotation of this entity linearly interpolated between ticks
 };

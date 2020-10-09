@@ -8,7 +8,7 @@ private:
 	static Game* gameInstance;
 	class TicksAndFPS* ticksAndFps;
 	class Player* thePlayer;//the player
-	class EntityLiving* guards;//array
+	class Guard* guards;//array
 	bool closing = false;//will be true when window is being closed
 
 	/*Toggles the provided boolean reference if the provided button bool is true.*/
@@ -16,6 +16,8 @@ private:
 
 	/*closes raylib*/
 	void closeRaylib();
+
+	float radians(float degrees);
 public:
 	static constexpr int screenWidth = 800;
 	static constexpr int screenHeight = 450;
@@ -32,6 +34,9 @@ public:
 
 	/*called every frame*/
 	void onFrame();
+
+	/*called every tick*/
+	void onTick();
 
 	/*renders the level and entities*/
 	void drawScene();
