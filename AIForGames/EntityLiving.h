@@ -1,5 +1,5 @@
 #pragma once
-#include "raymath.h"
+#include "AABB.h"
 /*Base class for living entites*/
 class EntityLiving
 {
@@ -7,7 +7,7 @@ protected:
 	/*each positional value has a previous tick value for interpolation*/
 	float rotation, prevRotation, moveAcel;
 	Vector2 pos, prevPos, vel{ 0,0 }, acel{ 0,0 }, frontVector{ 0,0 }, prevFrontvector{0,0};
-
+	AABB boundingBox = AABB(-12.5F, -12.5F, 12.5F, 12.5F);
 	/*aligns front vector to rotation of entity*/
 	void alignFrontVector();
 
@@ -22,6 +22,7 @@ public:
 	virtual void onTick();
 
 	void setPos(float x, float y) { pos.x = x; pos.y = y; }
+	void setPos(Vector2 newPos) { pos = newPos; }
 
 	void setRotation(float r) { rotation = r; }
 
@@ -37,4 +38,6 @@ public:
 
 	Vector2 getFrontVec() const { return frontVector; }
 	Vector2 getLerpFrontVec() const;
+
+	AABB getAABB() { return boundingBox; };
 };

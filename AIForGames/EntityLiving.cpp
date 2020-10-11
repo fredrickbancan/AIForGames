@@ -22,10 +22,10 @@ void EntityLiving::onTick()
 	vel.y += acel.y;
 	vel.x *= 1 - moveResistance;
 	vel.y *= 1 - moveResistance;
-	pos.x += vel.x;
-	pos.y += vel.y;
+	Game::get()->tryToMoveEntity(this, vel);
 	acel.x = 0;
 	acel.y = 0;
+	boundingBox.translate(pos);
 }
 void EntityLiving::alignFrontVector()
 {

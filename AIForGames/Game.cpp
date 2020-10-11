@@ -8,9 +8,10 @@ Game* Game::gameInstance = nullptr;
 #include "Player.h"
 #include "Guard.h"
 #include <iostream>
-#include <random>
 #include "math.h"
 #include "PlayerController.h"
+
+
 //triangle vertices
 const Vector2 triVert0{ 0.0F, -15.F };
 const Vector2 triVert1{ -10.0F, 10.F };
@@ -46,7 +47,7 @@ Game::Game()
         guards[i].setPos(screenWidth  - (rand() % screenWidth), rand() %  screenHeight);
         guards[i].setRotation(rand() % 360);
     }
-
+    buildLevelWalls();
     InitWindow(screenWidth, screenHeight, "Fredrick - AI for games");
 }
 
@@ -77,11 +78,10 @@ void Game::onTick()
 void Game::drawScene()
 {
     BeginDrawing();
-
+    
     ClearBackground(LIGHTGRAY);
 
     DrawText("Hello World", 325, 10, 20, BLACK);
-
     //TODO: impliment
 
     for (int i = 0; i < guardCount; i++)
@@ -121,6 +121,8 @@ void Game::drawScene()
         DrawTriangle(triVert0Copy, triVert1Copy, triVert2Copy, RED);
         //DEBUG front vector line
         DrawLine(guardLerpPos.x, guardLerpPos.y, guardLerpPos.x + theGuard.getLerpFrontVec().x * 50, guardLerpPos.y + theGuard.getLerpFrontVec().y * 50, DARKGREEN);
+        //DEBUG aabb box
+        drawAABB(theGuard.getAABB(), false);
     }
 
     //do same for player
@@ -159,8 +161,40 @@ void Game::drawScene()
     DrawTriangle(triVert0Copy, triVert1Copy, triVert2Copy, DARKBLUE);
     //DEBUG front vector line
     DrawLine(playerLerpPos.x, playerLerpPos.y, playerLerpPos.x + thePlayer->getLerpFrontVec().x * 50, playerLerpPos.y + thePlayer->getLerpFrontVec().y * 50, DARKGREEN);
+    //DEBUG aabb box
+    drawAABB(thePlayer->getAABB(), false);
+
+    //drawing all walls
+    for (std::vector<AABB>::iterator i = levelWallBoxes.begin(); i != levelWallBoxes.end(); i++)
+    {
+        drawAABB(*i, true);
+    }
 
     EndDrawing();
+}
+
+void Game::drawAABB(AABB box, bool wall)
+{
+    if (wall)
+    {
+        DrawRectangle(box.minBounds.x, box.minBounds.y, box.maxBounds.x - box.minBounds.x, box.maxBounds.y - box.minBounds.y, BLACK);
+    }
+    else
+    {
+        DrawRectangleLines(box.minBounds.x, box.minBounds.y, box.maxBounds.x - box.minBounds.x, box.maxBounds.y - box.minBounds.y, MAGENTA);
+    }
+}
+
+void Game::tryToMoveEntity(EntityLiving* ent, Vector2& vel)
+{
+    //TODO: Impliment collisions
+    Vector2 nextPos = Vector2Add(ent->getPos(), vel);//predicted position of entity
+    for (std::vector<AABB>::iterator i = levelWallBoxes.begin(); i != levelWallBoxes.end(); i++)
+    {
+        //test if nextpos will collide with a box, if so, adjust velocity accordingly
+    }
+
+    ent->setPos(nextPos);//temp
 }
 
 float Game::lerp(float start, float dest)
@@ -181,7 +215,20 @@ void Game::closeRaylib()
     CloseWindow();        // Close window and OpenGL context
 }
 
+void Game::buildLevelWalls()
+{
+    addWall(-10, 0, 10, screenHeight);//left screen bounds wall
+    addWall(screenWidth - 10, 0, screenWidth + 10, screenHeight);//right screen bounds wall
+    addWall(10, screenHeight - 10, screenWidth - 10, screenHeight + 10);//bottom screen bounds wall
+    addWall(10, -10, screenWidth - 10, 10);//top screen bounds wall
+}
+
+void Game::addWall(float minX, float minY, float maxX, float maxY)
+{
+    levelWallBoxes.push_back(AABB(minX, minY, maxX, maxY));
+}
+
 float Game::radians(float degrees)
 {
-    return degrees * ((float)(std::_Pi) / 180.0F);
+    return degrees * ((float)(3.141592653589F) / 180.0F);
 }

@@ -155,6 +155,7 @@
     <ClCompile Include="TicksAndFPS.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AABB.h" />
     <ClInclude Include="Guard.h" />
     <ClInclude Include="EntityLiving.h" />
     <ClInclude Include="Game.h" />
