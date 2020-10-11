@@ -1,29 +1,40 @@
 #pragma once
-
+#include "raymath.h"
 /*Base class for living entites*/
 class EntityLiving
 {
-private:
+protected:
 	/*each positional value has a previous tick value for interpolation*/
-	float posX, posY, prevPosX, prevPosY, rotation, prevRotation, moveAcel, velX = 0, velY = 0, acelX = 0, acelY = 0;
+	float rotation, prevRotation, moveAcel;
+	Vector2 pos, prevPos, vel{ 0,0 }, acel{ 0,0 }, frontVector{ 0,0 }, prevFrontvector{0,0};
 
+	/*aligns front vector to rotation of entity*/
+	void alignFrontVector();
+
+	float radians(float degrees);
+	
 public:
-	static constexpr float moveResistance = 0.5F;
+	static constexpr float moveResistance = 0.1F;
 	EntityLiving(float x, float y, float rotation);
 	EntityLiving();
 
 	/*called every tick to do stuff to entity*/
-	void onTick();
+	virtual void onTick();
 
-	void setPos(float x, float y) { posX = x; posY = y; }
+	void setPos(float x, float y) { pos.x = x; pos.y = y; }
 
 	void setRotation(float r) { rotation = r; }
 
-	float getPosX() const { return posX; }
-	float getPosY() const { return posY; }
+	float getPosX() const { return pos.x; }
+	float getPosY() const { return pos.y; }
+	Vector2 getPos() const { return pos; }
 	float getRotation() const { return rotation; }
 
 	float getLerpPosX() const;//returns the posX of this entity linearly interpolated between ticks
 	float getLerpPosY() const;//returns the posY of this entity linearly interpolated between ticks
+	Vector2 getLerpPos() const;//returns the posY of this entity linearly interpolated between ticks
 	float getLerpRotation() const;//returns the rotation of this entity linearly interpolated between ticks
+
+	Vector2 getFrontVec() const { return frontVector; }
+	Vector2 getLerpFrontVec() const;
 };

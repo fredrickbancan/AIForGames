@@ -9,6 +9,7 @@ private:
 	class TicksAndFPS* ticksAndFps;
 	class Player* thePlayer;//the player
 	class Guard* guards;//array
+	class PlayerController* playerController;//player controller instance
 	bool closing = false;//will be true when window is being closed
 
 	/*Toggles the provided boolean reference if the provided button bool is true.*/
@@ -18,6 +19,7 @@ private:
 	void closeRaylib();
 
 	float radians(float degrees);
+	Game();
 public:
 	static constexpr int screenWidth = 800;
 	static constexpr int screenHeight = 450;
@@ -28,7 +30,6 @@ public:
 	/*deletes the game instance*/
 	static void close();
 
-	Game();
 	Game(const Game&) = delete;
 	~Game();
 

@@ -10,11 +10,11 @@ Game* Game::gameInstance = nullptr;
 #include <iostream>
 #include <random>
 #include "math.h"
-
+#include "PlayerController.h"
 //triangle vertices
-const Vector2 triVert0{ 0.0F, -25.0F };
-const Vector2 triVert1{ -10.0F, 0.0F };
-const Vector2 triVert2{ 10.0F, 0.0F };
+const Vector2 triVert0{ 0.0F, -15.F };
+const Vector2 triVert1{ -10.0F, 10.F };
+const Vector2 triVert2{ 10.0F, 10.F };
 
 Game* Game::get()
 {
@@ -38,6 +38,7 @@ Game::Game()
 {
     ticksAndFps = new TicksAndFPS(30);
     thePlayer = new Player(10, 10, 0);
+    playerController = PlayerController::get();
     guards = new Guard[guardCount];
 
     for (int i = 0; i < guardCount; i++)
@@ -51,6 +52,7 @@ Game::Game()
 
 Game::~Game()
 {
+    PlayerController::close();
     delete thePlayer;
     delete[] guards;
     delete ticksAndFps;
@@ -60,6 +62,7 @@ void Game::onFrame()
 {
     if (closing = WindowShouldClose()) return;
     ticksAndFps->doOnTickUntillRealtimeSync(this);
+    playerController->update();
 }
 
 void Game::onTick()
@@ -84,7 +87,7 @@ void Game::drawScene()
     for (int i = 0; i < guardCount; i++)
     {
         Guard& theGuard = guards[i];
-
+        Vector2 guardLerpPos = theGuard.getLerpPos();
         Vector2 triVert0Copy = triVert0;
         Vector2 triVert1Copy = triVert1;
         Vector2 triVert2Copy = triVert2;
@@ -111,16 +114,13 @@ void Game::drawScene()
         triVert2Copy.y = newVert2Y;
 
         //translation
-        triVert0Copy.x += theGuard.getLerpPosX();
-        triVert0Copy.y += theGuard.getLerpPosY();
-
-        triVert1Copy.x += theGuard.getLerpPosX();
-        triVert1Copy.y += theGuard.getLerpPosY();
-
-        triVert2Copy.x += theGuard.getLerpPosX();
-        triVert2Copy.y += theGuard.getLerpPosY();
+        triVert0Copy = Vector2Add(triVert0Copy, guardLerpPos);
+        triVert1Copy = Vector2Add(triVert1Copy, guardLerpPos);
+        triVert2Copy = Vector2Add(triVert2Copy, guardLerpPos);
 
         DrawTriangle(triVert0Copy, triVert1Copy, triVert2Copy, RED);
+        //DEBUG front vector line
+        DrawLine(guardLerpPos.x, guardLerpPos.y, guardLerpPos.x + theGuard.getLerpFrontVec().x * 50, guardLerpPos.y + theGuard.getLerpFrontVec().y * 50, DARKGREEN);
     }
 
     //do same for player
@@ -151,16 +151,14 @@ void Game::drawScene()
     triVert2Copy.y = newVert2Y;
 
     //translation
-    triVert0Copy.x += thePlayer->getLerpPosX();
-    triVert0Copy.y += thePlayer->getLerpPosY();
-
-    triVert1Copy.x += thePlayer->getLerpPosX();
-    triVert1Copy.y += thePlayer->getLerpPosY();
-
-    triVert2Copy.x += thePlayer->getLerpPosX();
-    triVert2Copy.y += thePlayer->getLerpPosY();
+    Vector2 playerLerpPos = thePlayer->getLerpPos();
+    triVert0Copy = Vector2Add(triVert0Copy, playerLerpPos);
+    triVert1Copy = Vector2Add(triVert1Copy, playerLerpPos);
+    triVert2Copy = Vector2Add(triVert2Copy, playerLerpPos);
 
     DrawTriangle(triVert0Copy, triVert1Copy, triVert2Copy, DARKBLUE);
+    //DEBUG front vector line
+    DrawLine(playerLerpPos.x, playerLerpPos.y, playerLerpPos.x + thePlayer->getLerpFrontVec().x * 50, playerLerpPos.y + thePlayer->getLerpFrontVec().y * 50, DARKGREEN);
 
     EndDrawing();
 }
