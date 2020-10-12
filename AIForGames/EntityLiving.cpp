@@ -3,11 +3,13 @@
 #include <math.h>
 EntityLiving::EntityLiving(float x, float y, float rotation) : pos({ x,y }), prevPos({ x,y }), rotation(rotation), prevRotation(rotation)
 {
+	boundingBox.translate(pos);
 	moveAcel = .3F;
 }
 
 EntityLiving::EntityLiving() : pos({ 0,0 }), rotation(0), prevPos({0,0}), prevRotation(0)
 {
+	boundingBox.translate(pos);
 	moveAcel = .3F;
 }
 
@@ -16,7 +18,6 @@ void EntityLiving::onTick()
 	prevPos = pos;
 	prevRotation = rotation;
 	prevFrontvector = frontVector;
-	//TODO: make rotation follow heading
 	alignFrontVector();
 	vel.x += acel.x;
 	vel.y += acel.y;
@@ -25,7 +26,6 @@ void EntityLiving::onTick()
 	Game::get()->tryToMoveEntity(this, vel);
 	acel.x = 0;
 	acel.y = 0;
-	boundingBox.translate(pos);
 }
 void EntityLiving::alignFrontVector()
 {
@@ -36,6 +36,10 @@ void EntityLiving::alignFrontVector()
 float EntityLiving::radians(float degrees)
 {
 	return degrees * (3.1415926535897F / 180.0F);
+}
+void EntityLiving::walkFowards()
+{
+	acel = Vector2Add(acel, Vector2MultiplyV(frontVector, {moveAcel, moveAcel}));
 }
 float EntityLiving::getLerpPosX() const
 {

@@ -14,6 +14,7 @@ protected:
 	float radians(float degrees);
 	
 public:
+	static constexpr float rotationSpeed = 5.0F;
 	static constexpr float moveResistance = 0.1F;
 	EntityLiving(float x, float y, float rotation);
 	EntityLiving();
@@ -25,6 +26,9 @@ public:
 	void setPos(Vector2 newPos) { pos = newPos; }
 
 	void setRotation(float r) { rotation = r; }
+
+	/*makes this entity walk in the direction it is facing at the speed of moveAcel*/
+	void walkFowards();
 
 	float getPosX() const { return pos.x; }
 	float getPosY() const { return pos.y; }
@@ -39,5 +43,5 @@ public:
 	Vector2 getFrontVec() const { return frontVector; }
 	Vector2 getLerpFrontVec() const;
 
-	AABB getAABB() { return boundingBox; };
+	AABB* getAABB() { return &boundingBox; };
 };

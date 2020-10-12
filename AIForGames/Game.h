@@ -11,6 +11,7 @@ private:
 	class Player* thePlayer;//the player
 	class Guard* guards;//array
 	class PlayerController* playerController;//player controller instance
+	bool drawDebug = false;//if true, draw vectors and bounding boxes.
 	bool closing = false;//will be true when window is being closed
 	std::vector<AABB> levelWallBoxes;//all AABB colliders for level walls
 	/*Toggles the provided boolean reference if the provided button bool is true.*/
