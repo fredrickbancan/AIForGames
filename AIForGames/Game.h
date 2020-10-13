@@ -11,8 +11,17 @@ private:
 	class Player* thePlayer;//the player
 	class Guard* guards;//array
 	class PlayerController* playerController;//player controller instance
+	class GoldObject* goldObject;//the gold object the player must steal
+	AABB escapeTrigger{ 0,0,0,0 };//bounding box for the trigger the player must touch to win game
 	bool drawDebug = false;//if true, draw vectors and bounding boxes.
 	bool closing = false;//will be true when window is being closed
+	bool playerHasGold = false;//true when player picks up the gold
+	bool gameWon = false;//true if player escapes with gold
+	bool gameLost = false;//true if player is captured by guard
+	
+	int ticksSinceGameEndNeededToRestart;//number of ticks needed to pass before the game restarts after losing/winning
+	int ticksSinceGameEnd = 0;//ticks since the game ended, increases each tick after game is won/lost, when this reaches ticksSinceGameEndNeededToRestart, the game will restart.
+
 	std::vector<AABB> levelWallBoxes;//all AABB colliders for level walls
 	/*Toggles the provided boolean reference if the provided button bool is true.*/
 	void toggleBooleanOnButtonPress(bool button, bool& booleanToToggle);
@@ -25,6 +34,10 @@ private:
 
 	/*adds provided wall to walls*/
 	void addWall(float minX, float minY, float maxX, float maxY);
+
+	/*when called loads all the guards to be new with random positions
+	  also resets player and game state*/
+	void loadGuardsAndResetGame();
 
 	float radians(float degrees);
 	Game();

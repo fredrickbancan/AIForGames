@@ -24,6 +24,7 @@ void Guard::handleState()
 	{
 	case GuardState::WONDERING:
 		doStateWondering();
+
 		break;
 	default:
 		break;

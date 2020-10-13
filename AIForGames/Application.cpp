@@ -1,7 +1,7 @@
 #include "Game.h"
 
 int main(int argc, char* argv[])
-{
+  {
     // Initialization
     //--------------------------------------------------------------------------------------
     Game* gameInstance = Game::get();  

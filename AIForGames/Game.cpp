@@ -11,7 +11,7 @@ Game* Game::gameInstance = nullptr;
 #include <string>
 #include "math.h"
 #include "PlayerController.h"
-
+#include "GoldObject.h"
 
 //triangle vertices
 const Vector2 triVert0{ 0.0F, -15.F };
@@ -20,6 +20,7 @@ const Vector2 triVert2{ 10.0F, 10.F };
 
 Game* Game::get()
 {
+   
     if (gameInstance == nullptr)
     {
         gameInstance = new Game();
@@ -29,6 +30,7 @@ Game* Game::get()
 
 void Game::close()
 {
+    PlayerController::close();
     if (gameInstance != nullptr)
     {
         gameInstance->closeRaylib();
@@ -39,21 +41,21 @@ void Game::close()
 Game::Game()
 {
     ticksAndFps = new TicksAndFPS(30);
-    thePlayer = new Player((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() % (screenHeight - 40)) + 20.0F, (float)(rand() % 360));
+    ticksSinceGameEndNeededToRestart = ticksAndFps->getNumOfTicksForSeconds(3);
+    thePlayer = new Player(30, screenHeight - 30, 0);
     playerController = PlayerController::get();
     guards = new Guard[guardCount];
+    goldObject = new GoldObject((screenWidth / 2), (screenHeight / 2) - 50, thePlayer->getAABB(), &playerHasGold);
+    escapeTrigger = AABB(10, screenHeight-60, 100, screenHeight - 10);
 
-    for (int i = 0; i < guardCount; i++)
-    {
-        guards[i] = Guard((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() %  (screenHeight-40)) + 20.0F, (float)(rand() % 360));
-    }
     buildLevelWalls();
+    loadGuardsAndResetGame();
     InitWindow(screenWidth, screenHeight, "Fredrick - AI for games");
 }
 
 Game::~Game()
 {
-    PlayerController::close();
+    delete goldObject;
     delete thePlayer;
     delete[] guards;
     delete ticksAndFps;
@@ -61,6 +63,7 @@ Game::~Game()
 
 void Game::onFrame()
 {
+    toggleBooleanOnButtonPress(IsKeyPressed(KEY_F4), drawDebug);//toggle drawing debug if f4 pressed
     if (closing = WindowShouldClose()) return;
     ticksAndFps->doOnTickUntillRealtimeSync(this);
     playerController->update();
@@ -69,11 +72,31 @@ void Game::onFrame()
 
 void Game::onTick()
 {
-    for (int i = 0; i < guardCount; i++)
+    //TODO: impliment game losing condition
+
+    if (playerHasGold && AABB::touching(escapeTrigger, *thePlayer->getAABB()))
     {
-        guards[i].onTick();
+        gameWon = true;
+    }
+
+    if (!(gameWon || gameLost))//only update the guards if the game is running
+    {
+        for (int i = 0; i < guardCount; i++)
+        {
+            guards[i].onTick();
+        }
     }
     thePlayer->onTick();
+    goldObject->onTick();
+
+    if (gameWon || gameLost)
+    {
+        ticksSinceGameEnd++;
+        if (ticksSinceGameEnd >= ticksSinceGameEndNeededToRestart)
+        {
+            loadGuardsAndResetGame();//will reset game and set gamewon and gamelost to false
+        }
+    }
 }
 
 void Game::drawScene()
@@ -83,7 +106,21 @@ void Game::drawScene()
     ClearBackground(LIGHTGRAY);
     
     DrawText("Use arrow keys to move", screenWidth - 260, 10, 20, BLACK);
+    DrawText("Press F4 to draw hitboxes", screenWidth - 290, 30, 20, BLACK);
 
+    //game state based displays
+    if (playerHasGold)//if the player has picked up the gold
+    {
+        DrawText("Escape", 20, screenHeight - 40, 20, ORANGE);//text at spawn / escape spot
+        DrawText("Escape with the gold!", 300, 20, 20, ORANGE);//text at top of screen
+    }
+    else
+    {
+        DrawText("Start", 20, screenHeight - 40, 20, RED);//text at spawn / escape spot
+        DrawText("Steal the gold!", 330, 20, 20, BLACK);//text at top of screen
+        DrawRectangle((screenWidth/2)-5, (screenHeight/2)-55, 10,10,ORANGE);//gold in middle of level
+    }
+    
     for (int i = 0; i < guardCount; i++)
     {
         Guard& theGuard = guards[i];
@@ -174,6 +211,18 @@ void Game::drawScene()
     {
         drawAABB(*i, true);
     }
+
+    if (gameWon)
+    {
+        DrawRectangle(20 , 20, screenWidth - 40, screenHeight - 40, ORANGE);//Rectangle to cover screen
+        DrawText("You Won!", (screenWidth/2) - 200, (screenHeight/2) - 60, 100, BLACK);//YOU WON text
+    }
+    else if (gameLost)
+    {
+        DrawRectangle(20, 20, screenWidth - 40, screenHeight - 40, RED);//Rectangle to cover screen
+        DrawText("You Lost!", (screenWidth / 2) - 220, (screenHeight / 2) - 60, 100, BLACK);//YOU WON text
+    }
+
     DrawText((std::string("FPS: ") + std::to_string(ticksAndFps->getFps())).c_str(), 15, 10, 20, DARKGREEN);
     EndDrawing();
 }
@@ -317,6 +366,19 @@ void Game::buildLevelWalls()
 void Game::addWall(float minX, float minY, float maxX, float maxY)
 {
     levelWallBoxes.push_back(AABB(minX, minY, maxX, maxY));
+}
+void Game::loadGuardsAndResetGame()
+{
+    for (int i = 0; i < guardCount; i++)
+    {
+        guards[i] = Guard((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() % (screenHeight - 40)) + 20.0F, (float)(rand() % 360));
+    }
+    thePlayer->setPos(Vector2{ 30, screenHeight - 30 });
+    thePlayer->setRotation(0);
+    playerHasGold = false;
+    gameWon = false;
+    gameLost = false;
+    ticksSinceGameEnd = 0;
 }
 
 float Game::radians(float degrees)
