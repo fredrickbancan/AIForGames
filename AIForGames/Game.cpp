@@ -48,9 +48,9 @@ Game::Game()
     goldObject = new GoldObject((screenWidth / 2), (screenHeight / 2) - 50, thePlayer->getAABB(), &playerHasGold);
     escapeTrigger = AABB(10, screenHeight-60, 100, screenHeight - 10);
 
+    InitWindow(screenWidth, screenHeight, "Fredrick - AI for games");
     buildLevelWalls();
     loadGuardsAndResetGame();
-    InitWindow(screenWidth, screenHeight, "Fredrick - AI for games");
 }
 
 Game::~Game()
@@ -72,22 +72,25 @@ void Game::onFrame()
 
 void Game::onTick()
 {
-    //TODO: impliment game losing condition
-
     if (playerHasGold && AABB::touching(escapeTrigger, *thePlayer->getAABB()))
     {
         gameWon = true;
     }
 
+    thePlayer->onTick();
+    goldObject->onTick();
     if (!(gameWon || gameLost))//only update the guards if the game is running
     {
         for (int i = 0; i < guardCount; i++)
         {
             guards[i].onTick();
+            //test if guard is touching player, if so, game lost.
+            if (AABB::touching(*guards[i].getAABB(), *thePlayer->getAABB()))
+            {
+                gameLost = true;
+            }
         }
     }
-    thePlayer->onTick();
-    goldObject->onTick();
 
     if (gameWon || gameLost)
     {
@@ -367,18 +370,19 @@ void Game::addWall(float minX, float minY, float maxX, float maxY)
 {
     levelWallBoxes.push_back(AABB(minX, minY, maxX, maxY));
 }
+
 void Game::loadGuardsAndResetGame()
 {
-    for (int i = 0; i < guardCount; i++)
-    {
-        guards[i] = Guard((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() % (screenHeight - 40)) + 20.0F, (float)(rand() % 360));
-    }
-    thePlayer->setPos(Vector2{ 30, screenHeight - 30 });
-    thePlayer->setRotation(0);
     playerHasGold = false;
     gameWon = false;
     gameLost = false;
     ticksSinceGameEnd = 0;
+    for (int i = 0; i < guardCount; i++)
+    {
+        guards[i] = Guard((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() % (screenHeight - 40)) + 20.0F, (float)(rand() % 360));
+    }
+    thePlayer->setPos(30, screenHeight - 30);
+    thePlayer->setRotation(0);
 }
 
 float Game::radians(float degrees)
