@@ -287,8 +287,31 @@ void Game::buildLevelWalls()
     addWall(screenWidth - 10, 0, screenWidth + 10, screenHeight);//right screen bounds wall
     addWall(10, screenHeight - 10, screenWidth - 10, screenHeight + 10);//bottom screen bounds wall
     addWall(10, -10, screenWidth - 10, 10);//top screen bounds wall
-    addWall(100, 100, 200, 200);
-    addWall(200, 200, 300, 300);
+
+    addWall(100, screenHeight - 70, 110, screenHeight - 10);//spawn room right wall
+    addWall(10, screenHeight - 70, 55, screenHeight - 60);//spawn room upper wall
+
+    addWall(100, screenHeight - 200, screenWidth - 100, screenHeight - 190);//main room bottom wall
+    addWall(screenWidth - 110, 100, screenWidth - 100, screenHeight - 200);//main room right wall
+    addWall(100, 100, 110, screenHeight - 200);//main room left wall
+    addWall(110, 100, 350, 110);//main upper left wall
+    addWall(screenWidth - 350, 100, screenWidth - 110, 110);//main upper right wall
+
+    addWall(200, 160, screenWidth - 200, 170);//inner room upper wall
+    addWall(200, 170, 210, screenHeight - 260);//inner room left wall
+    addWall(screenWidth - 210, 170, screenWidth - 200, screenHeight - 260);//inner room right wall
+    addWall(200, screenHeight - 260, screenWidth - 450, screenHeight - 250);//inner room bottom left wall
+    addWall(screenWidth - 350, screenHeight - 260, screenWidth - 200, screenHeight - 250);//inner room bottom right wall
+
+    addWall(screenWidth - 450, screenHeight - 60, screenWidth - 400, screenHeight - 10);//bottom middle crate
+    addWall(screenWidth - 250, screenHeight - 120, screenWidth - 200, screenHeight - 70);//bottom middle right crate
+    addWall(screenWidth - 50, screenHeight - 240, screenWidth - 10, screenHeight - 200);//right lower crate
+    addWall(screenWidth - 100, screenHeight - 440, screenWidth - 60, screenHeight - 400);//right upper crate
+    addWall(60, screenHeight - 240, 100, screenHeight - 200);//left lower crate
+    addWall(10, screenHeight - 440, 50, screenHeight - 400);//left upper crate
+    addWall(300, 230, 350, 280);//inner middle left crate
+    addWall(screenWidth - 350, 230, screenWidth - 300, 280);//inner middle right crate
+    addWall(350, 270, screenWidth - 350, 280);//inner middle between-crate wall
 }
 
 void Game::addWall(float minX, float minY, float maxX, float maxY)

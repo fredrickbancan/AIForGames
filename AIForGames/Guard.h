@@ -15,9 +15,17 @@ private:
 	bool turningLeft = false;
 	bool turningRight = false;
 	enum class GuardState currentState = GuardState::WONDERING;
+
+	/*changes behaviour of this guard depending on its current state and external influences.*/
+	void handleState();
+
+	/*does the wondering state, randomly wondering.*/
+	void doStateWondering();
 public:
 	Guard(float x, float y, float rotation);
 	Guard();
+
+	
 
 	void onTick() override;
 };

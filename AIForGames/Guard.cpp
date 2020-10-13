@@ -1,5 +1,6 @@
 #include "Guard.h"
 #include <random>
+
 Guard::Guard(float x, float y, float rotation) : EntityLiving(x,y,rotation)
 {
 }
@@ -12,7 +13,24 @@ void Guard::onTick()
 {
 	//do stuff here
 
-	//TEMP
+	handleState();
+	
+	EntityLiving::onTick();
+}
+
+void Guard::handleState()
+{
+	switch (currentState)
+	{
+	case GuardState::WONDERING:
+		doStateWondering();
+		break;
+	default:
+		break;
+	}
+}
+void Guard::doStateWondering()
+{
 	if (rand() % 300 == 0)
 	{
 		walkingFowards = true;
@@ -49,7 +67,7 @@ void Guard::onTick()
 	{
 		walkFowards();
 	}
-	
+
 	if (turningLeft)
 	{
 		rotation -= rotationSpeed;
@@ -59,5 +77,4 @@ void Guard::onTick()
 	{
 		rotation += rotationSpeed;
 	}
-	EntityLiving::onTick();
 }
