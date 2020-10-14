@@ -11,8 +11,9 @@ private:
 	class Player* thePlayer;//the player
 	class Guard* guards;//array
 	class PlayerController* playerController;//player controller instance
-	class GoldObject* goldObject;//the gold object the player must steal
+	class NodeGraph* nodeGraph;//navigation nodes for guards
 	AABB escapeTrigger{ 0,0,0,0 };//bounding box for the trigger the player must touch to win game
+	AABB goldTrigger{ 0,0,0,0 };//bounding box for the trigger the player must touch to steal the gold
 	bool drawDebug = false;//if true, draw vectors and bounding boxes.
 	bool closing = false;//will be true when window is being closed
 	bool playerHasGold = false;//true when player picks up the gold

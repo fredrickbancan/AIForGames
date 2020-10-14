@@ -150,18 +150,20 @@
     <ClCompile Include="EntityLiving.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Guard.cpp" />
+    <ClCompile Include="NodeGraph.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="TicksAndFPS.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h" />
-    <ClInclude Include="GoldObject.h" />
     <ClInclude Include="Guard.h" />
     <ClInclude Include="EntityLiving.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="NodeGraph.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerController.h" />
+    <ClInclude Include="Ray2D.h" />
     <ClInclude Include="TicksAndFPS.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

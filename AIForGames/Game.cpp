@@ -11,7 +11,7 @@ Game* Game::gameInstance = nullptr;
 #include <string>
 #include "math.h"
 #include "PlayerController.h"
-#include "GoldObject.h"
+#include "NodeGraph.h"
 
 //triangle vertices
 const Vector2 triVert0{ 0.0F, -15.F };
@@ -45,17 +45,19 @@ Game::Game()
     thePlayer = new Player(30, screenHeight - 30, 0);
     playerController = PlayerController::get();
     guards = new Guard[guardCount];
-    goldObject = new GoldObject((screenWidth / 2), (screenHeight / 2) - 50, thePlayer->getAABB(), &playerHasGold);
+    nodeGraph = new NodeGraph(screenWidth / 25, screenHeight / 25, 25);
     escapeTrigger = AABB(10, screenHeight-60, 100, screenHeight - 10);
+    goldTrigger = AABB((screenWidth / 2) - 5, (screenHeight / 2) - 55, (screenWidth / 2) + 5, (screenHeight / 2) - 45);
 
     InitWindow(screenWidth, screenHeight, "Fredrick - AI for games");
     buildLevelWalls();
     loadGuardsAndResetGame();
+    nodeGraph->linkNodes(&levelWallBoxes);
 }
 
 Game::~Game()
 {
-    delete goldObject;
+    delete nodeGraph;
     delete thePlayer;
     delete[] guards;
     delete ticksAndFps;
@@ -72,13 +74,18 @@ void Game::onFrame()
 
 void Game::onTick()
 {
+    if (AABB::touching(goldTrigger, *thePlayer->getAABB()))
+    {
+        playerHasGold = true;
+    }
+
     if (playerHasGold && AABB::touching(escapeTrigger, *thePlayer->getAABB()))
     {
         gameWon = true;
     }
 
     thePlayer->onTick();
-    goldObject->onTick();
+
     if (!(gameWon || gameLost))//only update the guards if the game is running
     {
         for (int i = 0; i < guardCount; i++)
@@ -110,6 +117,9 @@ void Game::drawScene()
     
     DrawText("Use arrow keys to move", screenWidth - 260, 10, 20, BLACK);
     DrawText("Press F4 to draw hitboxes", screenWidth - 290, 30, 20, BLACK);
+
+    if(drawDebug)
+    nodeGraph->debugDrawNodes();
 
     //game state based displays
     if (playerHasGold)//if the player has picked up the gold
@@ -207,6 +217,12 @@ void Game::drawScene()
         DrawLine(playerLerpPos.x, playerLerpPos.y, playerLerpPos.x + thePlayer->getLerpFrontVec().x * 50, playerLerpPos.y + thePlayer->getLerpFrontVec().y * 50, DARKGREEN);
         //DEBUG aabb box
         drawAABB(*thePlayer->getAABB(), false);
+
+        //DEBUG draw escape trigger
+        drawAABB(escapeTrigger, false);
+
+        //DEBUG draw gold trigger
+        drawAABB(goldTrigger, false);
     }
 
     //drawing all walls
