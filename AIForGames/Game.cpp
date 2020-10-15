@@ -12,6 +12,7 @@ Game* Game::gameInstance = nullptr;
 #include "math.h"
 #include "PlayerController.h"
 #include "NodeGraph.h"
+#include "Ray2D.h"
 
 //triangle vertices
 const Vector2 triVert0{ 0.0F, -15.F };
@@ -20,10 +21,9 @@ const Vector2 triVert2{ 10.0F, 10.F };
 
 Game* Game::get()
 {
-   
     if (gameInstance == nullptr)
     {
-        gameInstance = new Game();
+        gameInstance = new Game(); 
     }
     return gameInstance;
 }
@@ -48,11 +48,6 @@ Game::Game()
     nodeGraph = new NodeGraph(screenWidth / 25, screenHeight / 25, 25);
     escapeTrigger = AABB(10, screenHeight-60, 100, screenHeight - 10);
     goldTrigger = AABB((screenWidth / 2) - 5, (screenHeight / 2) - 55, (screenWidth / 2) + 5, (screenHeight / 2) - 45);
-
-    InitWindow(screenWidth, screenHeight, "Fredrick - AI for games");
-    buildLevelWalls();
-    loadGuardsAndResetGame();
-    nodeGraph->linkNodes(&levelWallBoxes);
 }
 
 Game::~Game()
@@ -61,6 +56,14 @@ Game::~Game()
     delete thePlayer;
     delete[] guards;
     delete ticksAndFps;
+}
+
+void Game::init()
+{
+    InitWindow(screenWidth, screenHeight, "Fredrick - AI for games");
+    buildLevelWalls();
+    loadGuardsAndResetGame();
+    nodeGraph->linkNodes();
 }
 
 void Game::onFrame()
@@ -116,10 +119,10 @@ void Game::drawScene()
     ClearBackground(LIGHTGRAY);
     
     DrawText("Use arrow keys to move", screenWidth - 260, 10, 20, BLACK);
-    DrawText("Press F4 to draw hitboxes", screenWidth - 290, 30, 20, BLACK);
+    DrawText("Press F4 to debug render", screenWidth - 290, 30, 20, BLACK);
 
     if(drawDebug)
-    nodeGraph->debugDrawNodes();
+    nodeGraph->debugDrawNodes(thePlayer->getPos());
 
     //game state based displays
     if (playerHasGold)//if the player has picked up the gold
@@ -168,10 +171,11 @@ void Game::drawScene()
         triVert1Copy = Vector2Add(triVert1Copy, guardLerpPos);
         triVert2Copy = Vector2Add(triVert2Copy, guardLerpPos);
         DrawTriangle(triVert0Copy, triVert1Copy, triVert2Copy, RED);
+		//drawing the detector ray of guard
+        drawRayHittingWalls(theGuard.getDetectorRay());
+
         if (drawDebug)
         {
-            //DEBUG front vector line
-            DrawLine(guardLerpPos.x, guardLerpPos.y, guardLerpPos.x + theGuard.getLerpFrontVec().x * 50, guardLerpPos.y + theGuard.getLerpFrontVec().y * 50, DARKGREEN);
             //DEBUG aabb box
             drawAABB(*theGuard.getAABB(), false);
         }
@@ -336,6 +340,56 @@ float Game::lerp(float start, float dest)
     return start + (dest - start) * ticksAndFps->getPercentageToNextTick();
 }
 
+int Game::getNumOfTicksForSeconds(int seconds)
+{
+    return ticksAndFps->getNumOfTicksForSeconds(seconds);
+}
+
+bool Game::doesRayHitWall(Ray2D ray, Vector2* hitLocation)
+{
+    bool intersection = false;
+    Vector2 hitPos{};
+
+    /*vector of wall hit positions, necessary because the result must be the 
+      closest hit position to the ray origin.*/
+    std::vector<Vector2> wallHitPositions(levelWallBoxes.size());
+
+    for (std::vector<AABB>::const_iterator wall = levelWallBoxes.begin(); wall != levelWallBoxes.end(); wall++)
+    {  
+        if (intersecting(ray, *wall, &hitPos))
+        {
+            intersection = true;
+
+            if(hitLocation != nullptr)
+            wallHitPositions.push_back(hitPos);
+        }
+    }
+    
+    //find closest hit position and assign it to hitPos, then assign hitPos to the result hitLocation
+    if (intersection && hitLocation != nullptr)
+    {
+        float currentDistance = INT32_MAX; 
+        float testDistance = 0;
+        for (std::vector<Vector2>::const_iterator vec = wallHitPositions.begin(); vec != wallHitPositions.end(); vec++)
+        {
+            //test if vec in vector is closer than hitPos, if so, assign it to hitPos. After looping through all vectors we will have the closest position
+            if ((testDistance = Vector2Distance(ray.origin, *vec)) < currentDistance)
+            {
+                hitPos = *vec;
+                currentDistance = testDistance;
+            }
+        }
+        *hitLocation = hitPos;
+    }
+
+    return intersection;
+}
+
+Vector2 Game::getPlayerPos()
+{
+    return thePlayer->getPos();
+}
+
 void Game::toggleBooleanOnButtonPress(bool button, bool& booleanToToggle)
 {
     if (button)
@@ -396,11 +450,161 @@ void Game::loadGuardsAndResetGame()
     for (int i = 0; i < guardCount; i++)
     {
         guards[i] = Guard((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() % (screenHeight - 40)) + 20.0F, (float)(rand() % 360));
+        guards[i].setMaxSeekTicks(ticksAndFps->getNumOfTicksForSeconds((rand()%4) + 2));//randomly set chasing persistance of guard from 2 seconds to 6 seconds
     }
     thePlayer->setPos(30, screenHeight - 30);
     thePlayer->setRotation(0);
 }
 
+Vector2 Game::getClosestPointOnRay(Ray2D ray, Vector2 testPoint)
+{
+    float rayLength = Vector2Length(ray.direction);
+    Vector2 rayDirection = Vector2Normalize(ray.direction);
+    Vector2 vecFromRayOriginToTestPoint = Vector2Subtract(testPoint, ray.origin);
+    float dotProduct = Vector2DotProduct(vecFromRayOriginToTestPoint, rayDirection);
+    float dotClamped = Clamp(dotProduct, 0, rayLength);
+    return Vector2Scale(rayDirection, dotClamped);
+}
+
+bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
+{
+    //if ray is axis aligned, do these, faster and avoids divide by 0
+    ////
+    if (ray.direction.x == 0)//ray points straight y
+    {
+        if (ray.origin.x < box.minBounds.x || ray.origin.x > box.maxBounds.x)//if the ray is missing the box in the y direction
+        {
+            return false;
+        }
+
+        if (ray.direction.y < 0)//if ray pointing down
+        {
+            //ray must start above or inside the box and the distance from ray origin to box must be shorter than length
+            if ((ray.origin.y > box.minBounds.y) && (box.maxBounds.y - ray.origin.y <= ray.length))
+            {
+                if (hitLocation != nullptr)
+                {
+                    hitLocation->x = ray.origin.x;
+                    hitLocation->y = ray.origin.y - (box.maxBounds.y - ray.origin.y);
+                }
+                return true;
+            }
+            return false;
+        }
+        else
+        {
+            //ray must start below or inside the box and the distance from ray origin to box must be shorter than length
+            if ((ray.origin.y < box.maxBounds.y) && (box.minBounds.y - ray.origin.y <= ray.length))
+            {
+                if (hitLocation != nullptr)
+                {
+                    hitLocation->x = ray.origin.x;
+                    hitLocation->y = ray.origin.y + (box.minBounds.y - ray.origin.y);
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+
+    if (ray.direction.y == 0)//ray points straight x
+    {
+        if (ray.origin.y < box.minBounds.y || ray.origin.y > box.maxBounds.y)//if the ray is missing the box in the y direction
+        {
+            return false;
+        }
+
+        if (ray.direction.x < 0)//if ray pointing left
+        {
+            //ray must start to right or inside the box and the distance from ray origin to box must be shorter than length
+            if ((ray.origin.x > box.minBounds.x) && (box.maxBounds.x - ray.origin.x <= ray.length))
+            {
+                if (hitLocation != nullptr)
+                {
+                    hitLocation->x = ray.origin.x - (box.maxBounds.x - ray.origin.x);
+                    hitLocation->y = ray.origin.y;
+                }
+                return true;
+            }
+            return false;
+        }
+        else
+        {
+            //ray must start to left or inside the box and the distance from ray origin to box must be shorter than length
+            if ((ray.origin.x < box.maxBounds.x) && (box.minBounds.x - ray.origin.x <= ray.length))
+            {
+                if (hitLocation != nullptr)
+                {
+                    hitLocation->x = ray.origin.x + (box.minBounds.x - ray.origin.x);
+                    hitLocation->y = ray.origin.y;
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+    ////
+
+    //distances from ray origin to each axis of box
+    float xMin = 0, xMax = 0, yMin = 0, yMax = 0;
+
+    //getting distances
+    ////
+    if (ray.direction.x < 0)
+    {
+        xMin = (box.maxBounds.x - ray.origin.x) / ray.direction.x;
+        xMax = (box.minBounds.x - ray.origin.x) / ray.direction.x;
+    }
+    else
+    {
+        xMin = (box.minBounds.x - ray.origin.x) / ray.direction.x;
+        xMax = (box.maxBounds.x - ray.origin.x) / ray.direction.x;
+    }
+
+    if (ray.direction.y < 0)
+    {
+        yMin = (box.maxBounds.y - ray.origin.y) / ray.direction.y;
+        yMax = (box.minBounds.y - ray.origin.y) / ray.direction.y;
+    }
+    else
+    {
+        yMin = (box.minBounds.y - ray.origin.y) / ray.direction.y;
+        yMax = (box.maxBounds.y - ray.origin.y) / ray.direction.y;
+    }
+    ////
+
+    //ensure ray is hitting box
+    if (xMin > yMax || yMin > xMax)
+    {
+        return false;
+    }
+
+    float firstContactDist = std::max(xMin, yMin);
+    if (firstContactDist >= 0 && firstContactDist <= ray.length)
+    {
+        if (hitLocation != nullptr)//assign hit location if requested
+        {
+            *hitLocation = Vector2Add(ray.origin, Vector2Scale(ray.direction, firstContactDist));
+        }
+
+        return true;
+    }
+    return false;
+}
+
+void Game::drawRayHittingWalls(Ray2D ray)
+{
+    Vector2 wallHitPos{};
+    if (doesRayHitWall(ray, &wallHitPos))
+    {
+        DrawLine(ray.origin.x, ray.origin.y, wallHitPos.x, wallHitPos.y, RED);
+    }
+    else
+    {
+        DrawLine(ray.origin.x, ray.origin.y, ray.origin.x + ray.direction.x * ray.length, ray.origin.y + ray.direction.y * ray.length, RED);
+    }
+}
+ 
 float Game::radians(float degrees)
 {
     return degrees * ((float)(3.141592653589F) / 180.0F);

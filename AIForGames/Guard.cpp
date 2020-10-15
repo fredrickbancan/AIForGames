@@ -1,5 +1,7 @@
 #include "Guard.h"
 #include <random>
+#include "Ray2D.h"
+
 
 Guard::Guard(float x, float y, float rotation) : EntityLiving(x,y,rotation)
 {
@@ -18,6 +20,11 @@ void Guard::onTick()
 	EntityLiving::onTick();
 }
 
+Ray2D Guard::getDetectorRay()
+{
+	return Ray2D(pos, Vector2Scale(frontVector, detectorRayLength));
+}
+
 void Guard::handleState()
 {
 	switch (currentState)
@@ -32,12 +39,12 @@ void Guard::handleState()
 }
 void Guard::doStateWondering()
 {
-	if (rand() % 300 == 0)
+	if (rand() % 200 == 0)
 	{
 		walkingFowards = true;
 	}
 
-	if (walkingFowards && rand() % 50 == 0)
+	if (walkingFowards && rand() % 20 == 0)
 	{
 		walkingFowards = false;
 	}
@@ -47,7 +54,7 @@ void Guard::doStateWondering()
 	}
 	else
 	{
-		if (rand() % 300 == 0)
+		if (rand() % 100 == 0)
 		{
 			turningLeft = true;
 		}
@@ -55,7 +62,7 @@ void Guard::doStateWondering()
 		{
 			turningLeft = false;
 		}
-		if (rand() % 300 == 0)
+		if (rand() % 100 == 0)
 		{
 			turningRight = true;
 		}

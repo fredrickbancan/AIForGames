@@ -40,6 +40,16 @@ private:
 	  also resets player and game state*/
 	void loadGuardsAndResetGame();
 
+	/*returns true of the provided ray intersects with the provided box. Assigns the hit location on
+	  the AABB to hitlocation vector*/
+	bool intersecting(struct Ray2D ray, AABB box, Vector2* hitLocation = nullptr);
+
+	/*Returns a position vector along the ray closest to the provided point*/
+	Vector2 getClosestPointOnRay(struct Ray2D ray, Vector2 testPoint);
+	
+	/*draws the provided ray, if it hits a wall, draws it up to where it hits the wall.*/
+	void drawRayHittingWalls(struct Ray2D ray);
+
 	float radians(float degrees);
 	Game();
 public:
@@ -54,6 +64,9 @@ public:
 
 	Game(const Game&) = delete;
 	~Game();
+
+	/*Should be called before game loop*/
+	void init();
 
 	/*called every frame*/
 	void onFrame();
@@ -76,4 +89,12 @@ public:
 
 	/*linear interpolates the given values by the ticksandfps percentage to next tick*/
 	float lerp(float start, float dest);
+
+	/*returns number of ticks for provided seconds based on ticksandfps*/
+	int getNumOfTicksForSeconds(int seconds);
+
+	/*returns true if provided ray hits wall*/
+	bool doesRayHitWall(struct Ray2D ray, Vector2* hitLocation = nullptr);
+
+	Vector2 getPlayerPos();
 };

@@ -29,20 +29,15 @@ private:
 	NavNode* getNodeAtPos(float x, float y);
 	
 	/*returns true if the provided nodes are not obstructed by a wall in the vector*/
-	bool canNodeLinkToNode(NavNode* nodeA, NavNode* nodeB, const std::vector<AABB>* walls);
-
-	/*returns true of the provided ray intersects with the provided box*/
-	bool intersecting(struct Ray2D ray, AABB box);
-
-	/*Returns a position vector along the ray closest to the provided point*/
-	Vector2 getClosestPointOnRay(struct Ray2D ray, Vector2 testPoint);
+	bool canNodeLinkToNode(NavNode* nodeA, NavNode* nodeB);
 public:
 	NodeGraph(int nodesWide, int nodesHight, float nodeSpacing);
 	~NodeGraph() { delete[] nodes; }
 
 	/*Links all the nodes depending on if they can connect without a wall in the way*/
-	void linkNodes(const std::vector<AABB>* walls);
+	void linkNodes();
 
-	/*renders all the nodes as small squares, and their connections as lines*/
-	void debugDrawNodes();
+	/*renders all the nodes as small squares, and their connections as lines.
+	  Node closest to provided player position will be colored gold.*/
+	void debugDrawNodes(Vector2 playerPos);
 };

@@ -5,8 +5,8 @@ int main(int argc, char* argv[])
     // Initialization
     //--------------------------------------------------------------------------------------
     Game* gameInstance = Game::get();  
+    gameInstance->init();
     //--------------------------------------------------------------------------------------
-
     // Main game loop
     while (!gameInstance->isClosing())    // Detect window close button or ESC key
     {
