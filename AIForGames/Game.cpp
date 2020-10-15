@@ -57,10 +57,9 @@ Game::~Game()
     delete[] guards;
     delete ticksAndFps;
 }
-
 void Game::init()
 {
-    InitWindow(screenWidth, screenHeight, "Fredrick - AI for games");
+    InitWindow(screenWidth, screenHeight, "Fredrick - AI for games: Stealth Game");
     buildLevelWalls();
     loadGuardsAndResetGame();
     nodeGraph->linkNodes();
@@ -172,7 +171,7 @@ void Game::drawScene()
         triVert2Copy = Vector2Add(triVert2Copy, guardLerpPos);
         DrawTriangle(triVert0Copy, triVert1Copy, triVert2Copy, RED);
 		//drawing the detector ray of guard
-        drawRayHittingWalls(theGuard.getDetectorRay());
+        drawRayHittingWallsOrPlayer(theGuard.getDetectorRay());
 
         if (drawDebug)
         {
@@ -345,14 +344,14 @@ int Game::getNumOfTicksForSeconds(int seconds)
     return ticksAndFps->getNumOfTicksForSeconds(seconds);
 }
 
-bool Game::doesRayHitWall(Ray2D ray, Vector2* hitLocation)
+bool Game::doesRayHitWallOrPlayer(Ray2D ray, Vector2* hitLocation)
 {
     bool intersection = false;
     Vector2 hitPos{};
 
     /*vector of wall hit positions, necessary because the result must be the 
       closest hit position to the ray origin.*/
-    std::vector<Vector2> wallHitPositions(levelWallBoxes.size());
+    std::vector<Vector2> wallHitPositions;
 
     for (std::vector<AABB>::const_iterator wall = levelWallBoxes.begin(); wall != levelWallBoxes.end(); wall++)
     {  
@@ -363,6 +362,14 @@ bool Game::doesRayHitWall(Ray2D ray, Vector2* hitLocation)
             if(hitLocation != nullptr)
             wallHitPositions.push_back(hitPos);
         }
+    }
+
+    //get if hitting player box too, if so, add hit pos.
+    if (intersecting(ray, *thePlayer->getAABB(), &hitPos))
+    {
+        intersection = true;
+        if (hitLocation != nullptr)
+            wallHitPositions.push_back(hitPos);
     }
     
     //find closest hit position and assign it to hitPos, then assign hitPos to the result hitLocation
@@ -385,9 +392,59 @@ bool Game::doesRayHitWall(Ray2D ray, Vector2* hitLocation)
     return intersection;
 }
 
+bool Game::doesRayHitWall(Ray2D ray, Vector2* hitLocation)
+{
+    bool intersection = false;
+    Vector2 hitPos{};
+
+    /*vector of wall hit positions, necessary because the result must be the
+      closest hit position to the ray origin.*/
+    std::vector<Vector2> wallHitPositions(levelWallBoxes.size());
+
+    for (std::vector<AABB>::const_iterator wall = levelWallBoxes.begin(); wall != levelWallBoxes.end(); wall++)
+    {
+        if (intersecting(ray, *wall, &hitPos))
+        {
+            intersection = true;
+
+            if (hitLocation != nullptr)
+                wallHitPositions.push_back(hitPos);
+        }
+    }
+
+    //find closest hit position and assign it to hitPos, then assign hitPos to the result hitLocation
+    if (intersection && hitLocation != nullptr)
+    {
+        float currentDistance = INT32_MAX;
+        float testDistance = 0;
+        for (std::vector<Vector2>::const_iterator vec = wallHitPositions.begin(); vec != wallHitPositions.end(); vec++)
+        {
+            //test if vec in vector is closer than hitPos, if so, assign it to hitPos. After looping through all vectors we will have the closest position
+            if ((testDistance = Vector2Distance(ray.origin, *vec)) < currentDistance)
+            {
+                hitPos = *vec;
+                currentDistance = testDistance;
+            }
+        }
+        *hitLocation = hitPos;
+    }
+
+    return intersection;
+}
+
+bool Game::canPlayerSeePos(Vector2 pos)
+{
+    return !doesRayHitWall(Ray2D(thePlayer->getPos(), Vector2Subtract(pos, thePlayer->getPos())));
+}
+
 Vector2 Game::getPlayerPos()
 {
     return thePlayer->getPos();
+}
+
+AABB Game::getPlayerAABB()
+{
+    return *thePlayer->getAABB();
 }
 
 void Game::toggleBooleanOnButtonPress(bool button, bool& booleanToToggle)
@@ -450,7 +507,7 @@ void Game::loadGuardsAndResetGame()
     for (int i = 0; i < guardCount; i++)
     {
         guards[i] = Guard((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() % (screenHeight - 40)) + 20.0F, (float)(rand() % 360));
-        guards[i].setMaxSeekTicks(ticksAndFps->getNumOfTicksForSeconds((rand()%4) + 2));//randomly set chasing persistance of guard from 2 seconds to 6 seconds
+        guards[i].setMaxSeekCantSeePlayerTicks(ticksAndFps->getNumOfTicksForSeconds((rand()%4) + 2));//randomly set chasing persistance of guard from 2 seconds to 6 seconds
     }
     thePlayer->setPos(30, screenHeight - 30);
     thePlayer->setRotation(0);
@@ -536,7 +593,7 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
                 if (hitLocation != nullptr)
                 {
                     hitLocation->x = ray.origin.x + (box.minBounds.x - ray.origin.x);
-                    hitLocation->y = ray.origin.y;
+                    hitLocation->y = ray.origin.y; 
                 }
                 return true;
             }
@@ -592,10 +649,10 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
     return false;
 }
 
-void Game::drawRayHittingWalls(Ray2D ray)
+void Game::drawRayHittingWallsOrPlayer(Ray2D ray)
 {
     Vector2 wallHitPos{};
-    if (doesRayHitWall(ray, &wallHitPos))
+    if (doesRayHitWallOrPlayer(ray, &wallHitPos))
     {
         DrawLine(ray.origin.x, ray.origin.y, wallHitPos.x, wallHitPos.y, RED);
     }
@@ -607,5 +664,5 @@ void Game::drawRayHittingWalls(Ray2D ray)
  
 float Game::radians(float degrees)
 {
-    return degrees * ((float)(3.141592653589F) / 180.0F);
+    return degrees * (3.141592653589F / 180.0F);
 }

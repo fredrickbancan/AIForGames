@@ -14,24 +14,38 @@ private:
 	bool walkingFowards = false;
 	bool turningLeft = false;
 	bool turningRight = false;
-	int seekTicks = 0;//ticks will increase when lost sight of target to seek.
-	int maxSeekTicks = 0;//maximum number of ticks of not having sight of player. when reached guard will switch to wondering state
+	int seekCantSeePlayerTicks = 0;//ticks will increase when lost sight of target to seek.
+	int maxSeekCantSeePlayerTicks = 0;//maximum number of ticks of not having sight of player. when reached guard will switch to wondering state
 	Vector2 seekPosition{0,0};
-	float detectorRayLength = 1000.0F;//length of front facing ray that if player hits, will trigger guard to chase them.
+	float detectorRayLength = 150.0F;//length of front facing ray that if player hits, will trigger guard to chase them.
 	enum class GuardState currentState = GuardState::WONDERING;
 
 	/*changes behaviour of this guard depending on its current state and external influences.*/
 	void handleState();
 
-	/*does the wondering state, randomly wondering.*/
+	/*returns true if the detector ray is hitting the player aabb*/
+	bool doesDetectorRayHitPlayer();
+
+	/*does the wondering state, randomly wondering. If the detector ray hits the player AABB,
+	  switch to seeking state.*/
 	void doStateWondering();
+
+	/*Does the seeking state, If has direct line of sight to player, walk directly to them.
+	  Otherwise, use navigation nodes to go to player closest node. If the player has been out of line
+	  of sight longer than this guards maximum seek ticks, then go to wondering state.*/
+	void doStateSeeking();
+
+	/*makes this guard seek to the provided position.*/
+	void seekToPos(Vector2 pos);
+
 public:
 	Guard(float x, float y, float rotation);
 	Guard();
 
-	void setMaxSeekTicks(int max) { maxSeekTicks = max; };
+	void setMaxSeekCantSeePlayerTicks(int max) { maxSeekCantSeePlayerTicks = max; };
 
 	void onTick() override;
 
+	/*returns the ray from the front of this guard for detecting the player*/
 	struct Ray2D getDetectorRay();
 };

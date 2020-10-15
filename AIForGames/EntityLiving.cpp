@@ -16,6 +16,13 @@ EntityLiving::EntityLiving() : pos({ 0,0 }), rotation(0), prevPos({0,0}), prevRo
 void EntityLiving::onTick()
 {
 	prevPos = pos;
+
+	if (rotation < 0)
+	{
+		rotation = 360 + rotation;
+	}
+
+	rotation = fmodf(rotation, 360.0F);
 	prevRotation = rotation;
 	prevFrontvector = frontVector;
 	alignFrontVector();

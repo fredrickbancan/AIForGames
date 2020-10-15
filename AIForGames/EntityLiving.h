@@ -7,15 +7,15 @@ protected:
 	/*each positional value has a previous tick value for interpolation*/
 	float rotation, prevRotation, moveAcel;
 	Vector2 pos, prevPos, vel{ 0,0 }, acel{ 0,0 }, frontVector{ 0,0 }, prevFrontvector{0,0};
-	AABB boundingBox = AABB(-10, -10, 10, 10);
+	AABB boundingBox = AABB(-7, -7, 7, 7);
 	/*aligns front vector to rotation of entity*/
 	void alignFrontVector();
 
 	float radians(float degrees);
 	
+	float rotationSpeed = 5.0F;
+    float moveResistance = 0.1F;
 public:
-	static constexpr float rotationSpeed = 5.0F;
-	static constexpr float moveResistance = 0.1F;
 	EntityLiving(float x, float y, float rotation);
 	EntityLiving();
 
