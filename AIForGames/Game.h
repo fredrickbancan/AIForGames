@@ -107,4 +107,11 @@ public:
 	  the AABB to hitlocation vector*/
 	bool intersecting(struct Ray2D ray, AABB box, Vector2* hitLocation = nullptr);
 
+	/*returns an array of NavNode pointers which should be navigated to in order to reach the 
+	  endPos position. count will be assigned the count of nodes in the node pointer array.
+	  When path is no longer being used, this pointer array must be de-allocated by the user.*/
+	struct NavNode** getShortestPath(Vector2 startPos, Vector2 endPos, int& count);
+
+	/*returns node closest to the provided pos*/
+	struct NavNode* getNodeAtPos(Vector2 pos);
 };

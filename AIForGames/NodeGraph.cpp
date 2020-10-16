@@ -3,6 +3,11 @@
 #include "Ray2D.h"
 #include "Game.h"
 
+bool NodeGraph::doesNodeHaveNeighbor(NavNode* node)
+{
+	return node->linkTop != nullptr || node->linkRight != nullptr || node->linkBottom != nullptr || node->linkLeft != nullptr;
+}
+
 NodeGraph::NodeGraph(int nodesWide, int nodesHight, float nodeSpacing)
 {
 	nodesWidth = nodesWide;
@@ -47,7 +52,16 @@ NavNode* NodeGraph::getNodeAt(int x, int y)
 
 NavNode* NodeGraph::getNodeAtPos(float x, float y)
 {
-	return getNodeAt(roundf( x / nodeSpacing), roundf(y / nodeSpacing));
+	NavNode* bestNodeResult = nullptr;
+	//testing closest node to see if it is valid (if it can be navigated to), otherwise, find closest valid node
+	bestNodeResult = getNodeAt(roundf(x / nodeSpacing), roundf(y / nodeSpacing));
+	
+	if (!doesNodeHaveNeighbor(bestNodeResult))//if the current result isnt valid
+	{
+		bestNodeResult = getNodeAt(roundf(x / nodeSpacing) - 1, roundf(y / nodeSpacing));//try the node to the left
+	}
+
+	return bestNodeResult;
 }
 
 void NodeGraph::linkNodes()

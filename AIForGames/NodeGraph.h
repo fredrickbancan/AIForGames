@@ -25,17 +25,21 @@ private:
 	/*returns nearest node at the provided coordinates*/
 	NavNode* getNodeAt(int x, int y);
 
-	/*returns nearest node at the provided position*/
-	NavNode* getNodeAtPos(float x, float y);
-	
 	/*returns true if the provided nodes are not obstructed by a wall in the vector*/
 	bool canNodeLinkToNode(NavNode* nodeA, NavNode* nodeB);
+
+	/*returns true if the provided node has atleast 1 neightbor, useful for finding if
+	  a node can be navigated to or not.*/
+	bool doesNodeHaveNeighbor(NavNode* node);
 public:
 	NodeGraph(int nodesWide, int nodesHight, float nodeSpacing);
 	~NodeGraph() { delete[] nodes; }
 
 	/*Links all the nodes depending on if they can connect without a wall in the way*/
 	void linkNodes();
+
+	/*returns nearest valid node at the provided position*/
+	NavNode* getNodeAtPos(float x, float y);
 
 	/*renders all the nodes as small squares, and their connections as lines.
 	  Node closest to provided player position will be colored gold.*/

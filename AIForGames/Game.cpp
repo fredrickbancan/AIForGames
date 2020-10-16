@@ -45,7 +45,7 @@ Game::Game()
     thePlayer = new Player(30, screenHeight - 30, 0);
     playerController = PlayerController::get();
     guards = new Guard[guardCount];
-    nodeGraph = new NodeGraph(screenWidth / 25, screenHeight / 25, 25);
+    nodeGraph = new NodeGraph(screenWidth / 25 + 1, screenHeight / 25 + 1, 25);
     escapeTrigger = AABB(10, screenHeight-60, 100, screenHeight - 10);
     goldTrigger = AABB((screenWidth / 2) - 5, (screenHeight / 2) - 55, (screenWidth / 2) + 5, (screenHeight / 2) - 45);
 }
@@ -483,7 +483,7 @@ void Game::buildLevelWalls()
     addWall(screenWidth - 350, screenHeight - 260, screenWidth - 200, screenHeight - 250);//inner room bottom right wall
 
     addWall(screenWidth - 450, screenHeight - 60, screenWidth - 400, screenHeight - 10);//bottom middle crate
-    addWall(screenWidth - 250, screenHeight - 120, screenWidth - 200, screenHeight - 70);//bottom middle right crate
+    addWall(screenWidth - 250, screenHeight - 120, screenWidth - 200, screenHeight - 60);//bottom middle right crate
     addWall(screenWidth - 50, screenHeight - 240, screenWidth - 10, screenHeight - 200);//right lower crate
     addWall(screenWidth - 100, screenHeight - 440, screenWidth - 60, screenHeight - 400);//right upper crate
     addWall(60, screenHeight - 240, 100, screenHeight - 200);//left lower crate
@@ -537,7 +537,7 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
         if (ray.direction.y < 0)//if ray pointing down
         {
             //ray must start above or inside the box and the distance from ray origin to box must be shorter than length
-            if ((ray.origin.y > box.minBounds.y) && (box.maxBounds.y - ray.origin.y <= ray.length))
+            if ((ray.origin.y > box.minBounds.y) && (box.maxBounds.y - ray.origin.y < ray.length))
             {
                 if (hitLocation != nullptr)
                 {
@@ -551,7 +551,7 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
         else
         {
             //ray must start below or inside the box and the distance from ray origin to box must be shorter than length
-            if ((ray.origin.y < box.maxBounds.y) && (box.minBounds.y - ray.origin.y <= ray.length))
+            if ((ray.origin.y < box.maxBounds.y) && (box.minBounds.y - ray.origin.y < ray.length))
             {
                 if (hitLocation != nullptr)
                 {
@@ -574,7 +574,7 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
         if (ray.direction.x < 0)//if ray pointing left
         {
             //ray must start to right or inside the box and the distance from ray origin to box must be shorter than length
-            if ((ray.origin.x > box.minBounds.x) && (box.maxBounds.x - ray.origin.x <= ray.length))
+            if ((ray.origin.x > box.minBounds.x) && (box.maxBounds.x - ray.origin.x < ray.length))
             {
                 if (hitLocation != nullptr)
                 {
@@ -647,6 +647,19 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
         return true;
     }
     return false;
+}
+
+NavNode** Game::getShortestPath(Vector2 startPos, Vector2 endPos, int& count)
+{
+    NavNode* startNode = nodeGraph->getNodeAtPos(startPos.x, startPos.y);
+    NavNode* endNode = nodeGraph->getNodeAtPos(endPos.x, endPos.y);
+
+    return new NavNode*[69];
+}
+
+NavNode* Game::getNodeAtPos(Vector2 pos)
+{
+    return nodeGraph->getNodeAtPos(pos.x, pos.y);
 }
 
 void Game::drawRayHittingWallsOrPlayer(Ray2D ray)

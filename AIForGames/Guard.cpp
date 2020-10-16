@@ -6,7 +6,6 @@
 
 void Guard::doStateSeeking()
 {
-	//TODO: impliment
 	if (Game::get()->canPlayerSeePos(pos))//if guard has line of sight to player
 	{
 		//seek directly to player
@@ -14,7 +13,7 @@ void Guard::doStateSeeking()
 		seekCantSeePlayerTicks = 0;
 	}
 	else
-	{
+	{//TODO: impliment
 		//follow dijkstras path of nav nodes
 		seekCantSeePlayerTicks++;
 	}
@@ -24,8 +23,6 @@ void Guard::doStateSeeking()
 void Guard::seekToPos(Vector2 target)
 {
 	//rads to degrees = radians * (180.0F / 3.141592653589F)
-	
-	//TODO: impliment
 	Vector2 facingVec = Vector2Subtract(target, pos);
 	float facingRotation = (atan2(facingVec.y, facingVec.x) * (180.0F / 3.141592653589F)) + 90.0F;
 	
@@ -42,7 +39,7 @@ void Guard::seekToPos(Vector2 target)
 	float rotDiff = facingRotation - rotation;
 	
 	//ensure not to rotate full 360 degrees
-	if (rotDiff < -180 || rotDiff > 180)//TODO: find better way that doesnt cause little flicker
+	if (rotDiff < -180 || rotDiff > 180)
 	{
 		rotDiff = -rotDiff;
 	}
