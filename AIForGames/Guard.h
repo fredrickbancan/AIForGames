@@ -19,7 +19,9 @@ private:
 	Vector2 seekPosition{0,0};
 	float detectorRayLength = 150.0F;//length of front facing ray that if player hits, will trigger guard to chase them.
 	enum class GuardState currentState = GuardState::WONDERING;
-
+	struct NavNode** currentPath = nullptr;//the current path this guard is following
+	int currentPathCount = 0;//the count of nodes in the current path
+	int currentPathProgress = 0;//the number of nodes the guard has covered in its current path, acts as an index into the path node array.
 	/*changes behaviour of this guard depending on its current state and external influences.*/
 	void handleState();
 
@@ -37,6 +39,8 @@ private:
 
 	/*makes this guard seek to the provided position.*/
 	void seekToPos(Vector2 pos);
+
+	void deleteCurrentPath();
 
 public:
 	Guard(float x, float y, float rotation);

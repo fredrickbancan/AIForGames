@@ -3,7 +3,7 @@
 #include "Ray2D.h"
 #include "Game.h"
 #include <iostream>
-
+#include "NodeGraph.h"
 void Guard::doStateSeeking()
 {
 	if (Game::get()->canPlayerSeePos(pos))//if guard has line of sight to player
@@ -11,10 +11,31 @@ void Guard::doStateSeeking()
 		//seek directly to player
 		seekToPos(Game::get()->getPlayerPos());
 		seekCantSeePlayerTicks = 0;
+
+		deleteCurrentPath();
 	}
 	else
-	{//TODO: impliment
+	{
 		//follow dijkstras path of nav nodes
+		if (currentPath != nullptr)//if the current path exists
+		{
+			if (Game::get()->getNodeAtPos(pos) == currentPath[currentPathProgress])//if this guard as reached it current node position
+			{
+				currentPathProgress++;
+			}
+			if (currentPathProgress >= currentPathCount)//if this guard has reached the end of the path
+			{
+				//get a new path
+				deleteCurrentPath();
+				currentPath = Game::get()->getPath(pos, Game::get()->getPlayerPos(), currentPathCount);
+			}
+				seekToPos(currentPath[currentPathProgress]->pos);
+		}
+		else
+		{
+			//get a path to the last node the player was seen at
+			currentPath = Game::get()->getPath(pos, Game::get()->getPlayerPos(), currentPathCount);
+		}
 		seekCantSeePlayerTicks++;
 	}
 
@@ -49,16 +70,26 @@ void Guard::seekToPos(Vector2 target)
 	walkFowards();
 }
 
+void Guard::deleteCurrentPath()
+{
+	if (currentPath != nullptr)//remove the current path if it exists
+	{
+		delete[] currentPath;
+		currentPath = nullptr;
+		currentPathProgress = 0;
+	}
+}
+
 Guard::Guard(float x, float y, float rotation) : EntityLiving(x,y,rotation)
 {
-	moveAcel = .25F;
+	moveAcel = .15F;
 	rotationSpeed = 3.0F;
 	moveResistance = 0.05f;
 }
 
 Guard::Guard()
 {
-	moveAcel = .25F;
+	moveAcel = .15F;
 	rotationSpeed = 3.0F;
 	moveResistance = 0.05f;
 }

@@ -13,7 +13,7 @@ Game* Game::gameInstance = nullptr;
 #include "PlayerController.h"
 #include "NodeGraph.h"
 #include "Ray2D.h"
-
+#include <algorithm>
 //triangle vertices
 const Vector2 triVert0{ 0.0F, -15.F };
 const Vector2 triVert1{ -10.0F, 10.F };
@@ -507,7 +507,7 @@ void Game::loadGuardsAndResetGame()
     for (int i = 0; i < guardCount; i++)
     {
         guards[i] = Guard((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() % (screenHeight - 40)) + 20.0F, (float)(rand() % 360));
-        guards[i].setMaxSeekCantSeePlayerTicks(ticksAndFps->getNumOfTicksForSeconds((rand()%4) + 2));//randomly set chasing persistance of guard from 2 seconds to 6 seconds
+        guards[i].setMaxSeekCantSeePlayerTicks(ticksAndFps->getNumOfTicksForSeconds((rand()%60) + 10));//randomly set chasing persistance of guard to a range from 10 seconds to 60 seconds
     }
     thePlayer->setPos(30, screenHeight - 30);
     thePlayer->setRotation(0);
@@ -649,12 +649,23 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
     return false;
 }
 
-NavNode** Game::getShortestPath(Vector2 startPos, Vector2 endPos, int& count)
+NavNode** Game::getPath(Vector2 startPos, Vector2 endPos, int& count)
 {
+    //TODO: impliment
+    std::vector<NavNode*> path;
     NavNode* startNode = nodeGraph->getNodeAtPos(startPos.x, startPos.y);
     NavNode* endNode = nodeGraph->getNodeAtPos(endPos.x, endPos.y);
+    count = 2;
 
-    return new NavNode*[69];
+    //convert path to array for result
+    NavNode** pathToArray = new NavNode * [path.size()];
+    int j = 0;
+    for (std::vector<NavNode*>::iterator i = path.begin(); i != path.end(); i++)
+    {
+        pathToArray[j] = *i;//fill array
+        j++;
+    }
+    return pathToArray;
 }
 
 NavNode* Game::getNodeAtPos(Vector2 pos)
