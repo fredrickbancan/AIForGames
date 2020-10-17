@@ -14,17 +14,17 @@ void NodeGraph::resetNodes()
 	for (int i = 0; i < getCount(); i++)
 	{
 		nodes[i].parent = nullptr;
-		nodes[i].pathCost = INT32_MAX;
+		nodes[i].pathCost = INT16_MAX;
 	}
 }
-
+//TODO: FIX, NODES ARE INITIALIZED WITH BOGUS MEMORY DATA
 NodeGraph::NodeGraph(int nodesWide, int nodesHight, float nodeSpacing)
 {
 	nodesWidth = nodesWide;
 	nodesHeight = nodesHight;
 	this->nodeSpacing = nodeSpacing;
-	nodes = new NavNode[nodesWidth * nodesHeight];
-
+	nodes = new NavNode[nodesWidth * nodesHeight]{};
+	
 	//initializing nodes
 	float xOffset = 0;
 	float yOffset = 0;
@@ -36,17 +36,18 @@ NodeGraph::NodeGraph(int nodesWide, int nodesHight, float nodeSpacing)
 			getNodeAt(x,y)->pos.y = yOffset;
 
 			yOffset += nodeSpacing;
-			if (yOffset / nodeSpacing >= nodesHeight)
+			if (yOffset / nodeSpacing >= nodesHeight)//sort of a modulus
 			{
 				yOffset = 0;
 			}
 		}
 		xOffset += nodeSpacing;
-		if (xOffset / nodeSpacing >= nodesWidth)
+		if (xOffset / nodeSpacing >= nodesWidth)//sort of a modulus
 		{
 			xOffset = 0;
 		}
 	}
+	
 }
 
 NavNode* NodeGraph::getNodeAt(int x, int y)
@@ -76,8 +77,8 @@ NavNode* NodeGraph::getNodeAtPos(float x, float y)
 
 void NodeGraph::linkNodes()
 {
-	NavNode* nodeA;
-	NavNode* nodeB;
+	NavNode* nodeA = nullptr;
+	NavNode* nodeB = nullptr;
 	for (int x = 0; x < nodesWidth; x++)
 	{
 		for (int y = 0; y < nodesHeight; y++)
@@ -109,6 +110,7 @@ void NodeGraph::linkNodes()
 					nodeA->linkBottom = nodeB;
 				}
 			}
+			
 
 			//link left node
 			if ((nodeB = getNodeAt(x - 1, y)) != nullptr)
@@ -118,8 +120,10 @@ void NodeGraph::linkNodes()
 					nodeA->linkLeft = nodeB;
 				}
 			}
+
 		}
 	}
+	
 }
 
 bool NodeGraph::canNodeLinkToNode(NavNode* nodeA, NavNode* nodeB)
@@ -170,7 +174,6 @@ void processNodeLinkForPath(NavNode* currentNode, NavNode* connection, std::list
 
 NavNode** NodeGraph::getShortestPathDijkstras(Vector2 startPos, Vector2 endPos, int& pathCount)
 {
-	//TODO: impliment
 	NavNode* startNode = getNodeAtPos(startPos.x, startPos.y);
 	NavNode* endNode = getNodeAtPos(endPos.x, endPos.y);
 
@@ -225,6 +228,23 @@ void NodeGraph::debugDrawNodes(Vector2 playerPos)
 	for (int i = 0; i < (nodesWidth * nodesHeight); i++)
 	{
 		NavNode* currentNode = &nodes[i];
+		
+		if (currentNode->linkTop != nullptr)
+		{
+			DrawLine(currentNode->pos.x - 1, currentNode->pos.y, currentNode->pos.x - 1, currentNode->pos.y + nodeSpacing, DARKPURPLE);
+		}
+		if (currentNode->linkRight != nullptr)
+		{
+			DrawLine(currentNode->pos.x, currentNode->pos.y - 1, currentNode->pos.x + nodeSpacing, currentNode->pos.y - 1, DARKPURPLE);
+		}
+		if (currentNode->linkBottom != nullptr)
+		{
+			DrawLine(currentNode->pos.x + 1, currentNode->pos.y, currentNode->pos.x + 1, currentNode->pos.y - nodeSpacing, DARKGREEN);
+		}
+		if (currentNode->linkLeft != nullptr)
+		{
+			DrawLine(currentNode->pos.x, currentNode->pos.y + 1, currentNode->pos.x - nodeSpacing, currentNode->pos.y + 1, DARKGREEN);
+		}
 		if (getNodeAtPos(playerPos.x, playerPos.y) == currentNode)
 		{
 			DrawRectangle(currentNode->pos.x - 2, currentNode->pos.y - 2, 4, 4, GOLD);
@@ -232,22 +252,6 @@ void NodeGraph::debugDrawNodes(Vector2 playerPos)
 		else
 		{
 			DrawRectangle(currentNode->pos.x - 2, currentNode->pos.y - 2, 4, 4, DARKGREEN);
-		}
-		if (currentNode->linkTop != nullptr)
-		{
-			DrawLine(currentNode->pos.x, currentNode->pos.y, currentNode->pos.x, currentNode->pos.y + nodeSpacing, DARKPURPLE);
-		}
-		if (currentNode->linkRight != nullptr)
-		{
-			DrawLine(currentNode->pos.x, currentNode->pos.y, currentNode->pos.x + nodeSpacing, currentNode->pos.y, DARKPURPLE);
-		}
-		if (currentNode->linkBottom != nullptr)
-		{
-			DrawLine(currentNode->pos.x, currentNode->pos.y, currentNode->pos.x, currentNode->pos.y - nodeSpacing, DARKPURPLE);
-		}
-		if (currentNode->linkLeft != nullptr)
-		{
-			DrawLine(currentNode->pos.x, currentNode->pos.y, currentNode->pos.x - nodeSpacing, currentNode->pos.y, DARKPURPLE);
 		}
 	}
 }

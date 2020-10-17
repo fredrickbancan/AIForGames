@@ -10,7 +10,7 @@ struct NavNode
 	NavNode* linkBottom = nullptr;
 	NavNode* linkLeft = nullptr;
 	NavNode* parent = nullptr;//previous node used for generating paths. reset each time a path is requested.
-	int pathCost = INT32_MAX;//cost of the path to this node. reset each time a path is requested.
+	int pathCost = INT16_MAX;//cost of the path to this node. reset each time a path is requested.
 	Vector2 pos{ 0,0 };
 };
 
