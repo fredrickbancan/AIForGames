@@ -9,6 +9,8 @@ struct NavNode
 	NavNode* linkRight = nullptr;
 	NavNode* linkBottom = nullptr;
 	NavNode* linkLeft = nullptr;
+	NavNode* parent = nullptr;//previous node used for generating paths. reset each time a path is requested.
+	int pathCost = INT32_MAX;//cost of the path to this node. reset each time a path is requested.
 	Vector2 pos{ 0,0 };
 };
 
@@ -31,6 +33,9 @@ private:
 	/*returns true if the provided node has atleast 1 neightbor, useful for finding if
 	  a node can be navigated to or not.*/
 	bool doesNodeHaveNeighbor(NavNode* node);
+
+	/*resets all the prevNavNode pointers and pathCost values to their defaults*/
+	void resetNodes();
 public:
 	NodeGraph(int nodesWide, int nodesHight, float nodeSpacing);
 	~NodeGraph() { delete[] nodes; }
@@ -41,7 +46,14 @@ public:
 	/*returns nearest valid node at the provided position*/
 	NavNode* getNodeAtPos(float x, float y);
 
+	/*returns an array of NavNode pointers which should be navigated to in order to reach the
+	  endPos position. count will be assigned the count of nodes in the node pointer array.
+	  When path is no longer being used, this pointer array must be de-allocated by the user.*/
+	NavNode** getShortestPathDijkstras(Vector2 startPos, Vector2 endPos, int& pathCount);
+
 	/*renders all the nodes as small squares, and their connections as lines.
 	  Node closest to provided player position will be colored gold.*/
 	void debugDrawNodes(Vector2 playerPos);
+
+	int getCount() { return nodesWidth * nodesHeight; };
 };

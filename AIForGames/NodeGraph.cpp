@@ -2,10 +2,20 @@
 #include "raylib.h"
 #include "Ray2D.h"
 #include "Game.h"
-
+#include <list>
+#include <iostream>
 bool NodeGraph::doesNodeHaveNeighbor(NavNode* node)
 {
 	return node->linkTop != nullptr || node->linkRight != nullptr || node->linkBottom != nullptr || node->linkLeft != nullptr;
+}
+
+void NodeGraph::resetNodes()
+{
+	for (int i = 0; i < getCount(); i++)
+	{
+		nodes[i].parent = nullptr;
+		nodes[i].pathCost = INT32_MAX;
+	}
 }
 
 NodeGraph::NodeGraph(int nodesWide, int nodesHight, float nodeSpacing)
@@ -117,6 +127,98 @@ bool NodeGraph::canNodeLinkToNode(NavNode* nodeA, NavNode* nodeB)
 	return !Game::get()->doesRayHitWall(Ray2D(nodeA->pos, Vector2Subtract(nodeB->pos, nodeA->pos)));
 }
 
+/*used for sorting open list when calculating dijkstras path*/
+bool lessThanComparitor(NavNode* a, NavNode* b)
+{
+	return a->pathCost < b->pathCost;
+}
+
+/*takes in one of the links to the current node being processed in the path find and
+  determines if it has been visited and has a shorter path cost, and can add it to the
+  open list*/
+void processNodeLinkForPath(NavNode* currentNode, NavNode* connection, std::list<NavNode*>& openList, std::list<NavNode*>& closedList)
+{
+	if (connection == nullptr)
+		return;
+
+	bool inOpened = std::find(openList.begin(), openList.end(), connection) != openList.end();
+	bool inClosed = std::find(closedList.begin(), closedList.end(), connection) != closedList.end();
+
+	int newPathcost = currentNode->pathCost + 1;//pathCost + 1 because there are no weights or edges.
+
+	//if not already traversed (i.e, not in closed list) OR the new path cost is less than the path cost of the connection
+	if (!inClosed )
+	{
+		connection->pathCost = newPathcost;
+		connection->parent = currentNode;
+	}
+	else
+	{
+		if (newPathcost < connection->pathCost)
+		{
+			connection->pathCost = newPathcost;
+			connection->parent = currentNode;
+		}
+	}
+
+	//if not already traversed and is not in the open list
+	if (!inClosed && !inOpened)
+	{
+		openList.push_back(connection);
+	}
+}
+
+NavNode** NodeGraph::getShortestPathDijkstras(Vector2 startPos, Vector2 endPos, int& pathCount)
+{
+	//TODO: impliment
+	NavNode* startNode = getNodeAtPos(startPos.x, startPos.y);
+	NavNode* endNode = getNodeAtPos(endPos.x, endPos.y);
+
+	resetNodes();//prepare nodes for finding a path
+
+	std::list<NavNode*> openList;//to be used as priority queue
+	std::list<NavNode*> closedList;//to be used as priority queue
+
+	openList.push_back(startNode);//add start node
+
+	while (!openList.empty())
+	{
+		openList.sort(lessThanComparitor);//sort by smallest path cost value
+
+		NavNode* currentNode = openList.front();//get the first node in queue and remove from open list
+		openList.pop_front();
+
+		closedList.push_back(currentNode);
+
+		//for each connection to the current node, process and add to open list
+		processNodeLinkForPath(currentNode, currentNode->linkTop, openList, closedList);
+		processNodeLinkForPath(currentNode, currentNode->linkRight, openList, closedList);
+		processNodeLinkForPath(currentNode, currentNode->linkLeft, openList, closedList);
+		processNodeLinkForPath(currentNode, currentNode->linkBottom, openList, closedList);
+	}
+
+	//construct result
+	NavNode* current = endNode;
+	int size = 0;
+	//calculate size of path in nodes
+	while (current != nullptr)
+	{
+		current = current->parent;
+		size++;
+	}
+	pathCount = size;
+	std::cout << pathCount << std::endl;
+	//construct result array
+	NavNode** result = new NavNode * [size];
+	current = endNode;
+	while (current != nullptr)
+	{
+		result[size - 1] = current;
+		current = current->parent;
+		size--;
+	}
+	return result;
+}
 
 void NodeGraph::debugDrawNodes(Vector2 playerPos)
 {

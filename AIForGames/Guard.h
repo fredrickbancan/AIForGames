@@ -52,4 +52,10 @@ public:
 
 	/*returns the ray from the front of this guard for detecting the player*/
 	struct Ray2D getDetectorRay();
+
+	/*returns true if this guard is navigating a path*/
+	bool hasPath() { return currentPath != nullptr; };
+
+	/*draws the current nav path as a series of lines*/
+	void drawPath();
 };

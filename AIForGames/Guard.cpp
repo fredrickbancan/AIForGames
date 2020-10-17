@@ -4,6 +4,7 @@
 #include "Game.h"
 #include <iostream>
 #include "NodeGraph.h"
+#include "raylib.h"
 void Guard::doStateSeeking()
 {
 	if (Game::get()->canPlayerSeePos(pos))//if guard has line of sight to player
@@ -27,14 +28,14 @@ void Guard::doStateSeeking()
 			{
 				//get a new path
 				deleteCurrentPath();
-				currentPath = Game::get()->getPath(pos, Game::get()->getPlayerPos(), currentPathCount);
+				currentPath = Game::get()->getShortestPath(pos, Game::get()->getPlayerPos(), currentPathCount);
 			}
 				seekToPos(currentPath[currentPathProgress]->pos);
 		}
 		else
 		{
 			//get a path to the last node the player was seen at
-			currentPath = Game::get()->getPath(pos, Game::get()->getPlayerPos(), currentPathCount);
+			currentPath = Game::get()->getShortestPath(pos, Game::get()->getPlayerPos(), currentPathCount);
 		}
 		seekCantSeePlayerTicks++;
 	}
@@ -82,16 +83,17 @@ void Guard::deleteCurrentPath()
 
 Guard::Guard(float x, float y, float rotation) : EntityLiving(x,y,rotation)
 {
-	moveAcel = .15F;
-	rotationSpeed = 3.0F;
-	moveResistance = 0.05f;
+	moveAcel = .3F;
+	
+	rotationSpeed = 6.0F;
+	moveResistance = 0.15f;
 }
 
 Guard::Guard()
 {
-	moveAcel = .15F;
-	rotationSpeed = 3.0F;
-	moveResistance = 0.05f;
+	moveAcel = .3F;
+	rotationSpeed = 6.0F;
+	moveResistance = 0.15f;
 }
 
 void Guard::onTick()
@@ -106,6 +108,20 @@ void Guard::onTick()
 Ray2D Guard::getDetectorRay()
 {
 	return Ray2D(pos, Vector2Scale(frontVector, detectorRayLength));
+}
+
+void Guard::drawPath()
+{
+	if (currentPath == nullptr) return;
+	for (int i = currentPathCount; i > currentPathProgress + 1; i--)
+	{
+		//draw line from node to its parent
+		NavNode* current = currentPath[i - 1];
+		NavNode* next = currentPath[i - 2];
+		DrawLine(current->pos.x, current->pos.y, next->pos.x, next->pos.y, RED);
+	}
+	NavNode* end = currentPath[currentPathCount - 1];
+	DrawRectangle(end->pos.x - 2, end->pos.y -2, 4, 4, RED);
 }
 
 void Guard::handleState()

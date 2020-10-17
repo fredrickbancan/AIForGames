@@ -13,7 +13,6 @@ Game* Game::gameInstance = nullptr;
 #include "PlayerController.h"
 #include "NodeGraph.h"
 #include "Ray2D.h"
-#include <algorithm>
 //triangle vertices
 const Vector2 triVert0{ 0.0F, -15.F };
 const Vector2 triVert1{ -10.0F, 10.F };
@@ -172,7 +171,7 @@ void Game::drawScene()
         DrawTriangle(triVert0Copy, triVert1Copy, triVert2Copy, RED);
 		//drawing the detector ray of guard
         drawRayHittingWallsOrPlayer(theGuard.getDetectorRay());
-
+        theGuard.drawPath();
         if (drawDebug)
         {
             //DEBUG aabb box
@@ -488,9 +487,9 @@ void Game::buildLevelWalls()
     addWall(screenWidth - 100, screenHeight - 440, screenWidth - 60, screenHeight - 400);//right upper crate
     addWall(60, screenHeight - 240, 100, screenHeight - 200);//left lower crate
     addWall(10, screenHeight - 440, 50, screenHeight - 400);//left upper crate
-    addWall(300, 230, 350, 280);//inner middle left crate
-    addWall(screenWidth - 350, 230, screenWidth - 300, 280);//inner middle right crate
-    addWall(350, 270, screenWidth - 350, 280);//inner middle between-crate wall
+    addWall(300, 230, 350, 290);//inner middle left crate
+    addWall(screenWidth - 350, 230, screenWidth - 300, 290);//inner middle right crate
+    addWall(350, 260, screenWidth - 350, 290);//inner middle between-crate wall
 }
 
 void Game::addWall(float minX, float minY, float maxX, float maxY)
@@ -649,23 +648,9 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
     return false;
 }
 
-NavNode** Game::getPath(Vector2 startPos, Vector2 endPos, int& count)
+NavNode** Game::getShortestPath(Vector2 startPos, Vector2 endPos, int& count)
 {
-    //TODO: impliment
-    std::vector<NavNode*> path;
-    NavNode* startNode = nodeGraph->getNodeAtPos(startPos.x, startPos.y);
-    NavNode* endNode = nodeGraph->getNodeAtPos(endPos.x, endPos.y);
-    count = 2;
-
-    //convert path to array for result
-    NavNode** pathToArray = new NavNode * [path.size()];
-    int j = 0;
-    for (std::vector<NavNode*>::iterator i = path.begin(); i != path.end(); i++)
-    {
-        pathToArray[j] = *i;//fill array
-        j++;
-    }
-    return pathToArray;
+    return nodeGraph->getShortestPathDijkstras(startPos, endPos, count);
 }
 
 NavNode* Game::getNodeAtPos(Vector2 pos)
