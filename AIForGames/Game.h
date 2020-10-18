@@ -51,7 +51,7 @@ private:
 public:
 	static constexpr int screenWidth = 800;
 	static constexpr int screenHeight = 600;
-	static constexpr int guardCount = 15;
+	static constexpr int guardCount = 12;
 	/*returns the instance of the game*/
 	static Game* get();
 	
