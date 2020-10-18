@@ -22,6 +22,7 @@ private:
 	struct NavNode** currentPath = nullptr;//the current path this guard is following
 	int currentPathCount = 0;//the count of nodes in the current path
 	int currentPathProgress = 0;//the number of nodes the guard has covered in its current path, acts as an index into the path node array.
+	
 	/*changes behaviour of this guard depending on its current state and external influences.*/
 	void handleState();
 
