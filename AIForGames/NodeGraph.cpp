@@ -4,8 +4,13 @@
 #include "Game.h"
 #include <list>
 #include <iostream>
+#include "math.h"
 bool NodeGraph::doesNodeHaveNeighbor(NavNode* node)
 {
+	if (node == nullptr)
+	{
+		return false;
+	}
 	return node->linkTop != nullptr || node->linkRight != nullptr || node->linkBottom != nullptr || node->linkLeft != nullptr;
 }
 
@@ -17,7 +22,8 @@ void NodeGraph::resetNodes()
 		nodes[i].pathCost = INT16_MAX;
 	}
 }
-//TODO: FIX, NODES ARE INITIALIZED WITH BOGUS MEMORY DATA
+
+
 NodeGraph::NodeGraph(int nodesWide, int nodesHight, float nodeSpacing)
 {
 	nodesWidth = nodesWide;
@@ -52,13 +58,19 @@ NodeGraph::NodeGraph(int nodesWide, int nodesHight, float nodeSpacing)
 
 NavNode* NodeGraph::getNodeAt(int x, int y)
 {
-	/*if the provided coords is out of range*/
-	if ((x * nodesHeight) + y > nodesWidth * nodesHeight)
+	if (x < 0 || x >= nodesWidth || y < 0 || y >= nodesHeight)
 	{
 		return nullptr;
 	}
 
-	return &nodes[(x * nodesHeight) + y];
+	int index = (x * nodesHeight) + y;
+	/*if the provided coords is out of range*/
+	if (index > nodesWidth * nodesHeight || index < 0)
+	{
+		return nullptr;
+	}
+
+	return &nodes[index];
 }
 
 NavNode* NodeGraph::getNodeAtPos(float x, float y)
@@ -74,7 +86,7 @@ NavNode* NodeGraph::getNodeAtPos(float x, float y)
 
 	return bestNodeResult;
 }
-
+//TODO: FIX, nodes cannot connect in negative directions, intersection tests always return true :(
 void NodeGraph::linkNodes()
 {
 	NavNode* nodeA = nullptr;
@@ -123,7 +135,13 @@ void NodeGraph::linkNodes()
 
 		}
 	}
-	
+	/*for (int i = 0; i < getCount(); i++)
+	{
+		if (nodes[i].linkBottom != nullptr)
+		{
+			std::cout << "found " << nodes[i].pos.x << " " << nodes[i].pos.y << std::endl;
+		}
+	}*/
 }
 
 bool NodeGraph::canNodeLinkToNode(NavNode* nodeA, NavNode* nodeB)
@@ -176,6 +194,15 @@ NavNode** NodeGraph::getShortestPathDijkstras(Vector2 startPos, Vector2 endPos, 
 {
 	NavNode* startNode = getNodeAtPos(startPos.x, startPos.y);
 	NavNode* endNode = getNodeAtPos(endPos.x, endPos.y);
+
+	/*handling invalid positions, just returns 0,0*/
+	if (startNode == nullptr || endNode == nullptr)
+	{
+		pathCount = 1;
+		NavNode** result = new NavNode * [1];
+		result[0] = getNodeAt(0, 0);
+		return result;
+	}
 
 	resetNodes();//prepare nodes for finding a path
 

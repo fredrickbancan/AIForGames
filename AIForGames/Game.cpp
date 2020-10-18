@@ -534,7 +534,7 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
         }
 
         if (ray.direction.y < 0)//if ray pointing down
-        {
+        { 
             //ray must start above or inside the box and the distance from ray origin to box must be shorter than length
             if ((ray.origin.y > box.minBounds.y) && (box.maxBounds.y - ray.origin.y < ray.length))
             {
