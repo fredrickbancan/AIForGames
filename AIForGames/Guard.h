@@ -45,6 +45,7 @@ private:
 public:
 	Guard(float x, float y, float rotation);
 	Guard();
+	~Guard() { deleteCurrentPath(); };
 
 	void setMaxSeekCantSeePlayerTicks(int max) { maxSeekCantSeePlayerTicks = max; };
 

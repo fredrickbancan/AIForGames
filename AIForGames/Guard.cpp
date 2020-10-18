@@ -9,6 +9,7 @@ void Guard::doStateSeeking()
 {
 	if (Game::get()->canPlayerSeePos(pos))//if guard has line of sight to player
 	{
+		rotationSpeed = 5.0F;
 		//seek directly to player
 		seekToPos(Game::get()->getPlayerPos());
 		seekCantSeePlayerTicks = 0;
@@ -17,6 +18,7 @@ void Guard::doStateSeeking()
 	}
 	else
 	{
+		rotationSpeed = 25.0F;
 		//follow dijkstras path of nav nodes
 		if (currentPath != nullptr)//if the current path exists
 		{
@@ -83,16 +85,16 @@ void Guard::deleteCurrentPath()
 
 Guard::Guard(float x, float y, float rotation) : EntityLiving(x,y,rotation)
 {
-	moveAcel = .3F;
+	moveAcel = .5F;
 	
-	rotationSpeed = 6.0F;
+	rotationSpeed = 5.0F;
 	moveResistance = 0.15f;
 }
 
 Guard::Guard()
 {
-	moveAcel = .3F;
-	rotationSpeed = 6.0F;
+	moveAcel = .5F;
+	rotationSpeed = 5.0F;
 	moveResistance = 0.15f;
 }
 
@@ -139,6 +141,8 @@ void Guard::handleState()
 		doStateSeeking();
 		if (seekCantSeePlayerTicks >= maxSeekCantSeePlayerTicks)
 		{
+			rotationSpeed = 5.0F;
+			deleteCurrentPath();
 			currentState = GuardState::WONDERING;
 			seekCantSeePlayerTicks = 0;
 		}

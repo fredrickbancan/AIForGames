@@ -506,7 +506,7 @@ void Game::loadGuardsAndResetGame()
     for (int i = 0; i < guardCount; i++)
     {
         guards[i] = Guard((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() % (screenHeight - 40)) + 20.0F, (float)(rand() % 360));
-        guards[i].setMaxSeekCantSeePlayerTicks(ticksAndFps->getNumOfTicksForSeconds((rand()%60) + 10));//randomly set chasing persistance of guard to a range from 10 seconds to 60 seconds
+        guards[i].setMaxSeekCantSeePlayerTicks(ticksAndFps->getNumOfTicksForSeconds((rand()%30) + 20));//randomly set chasing persistance of guard to a range from 20 seconds to 30 seconds
     }
     thePlayer->setPos(30, screenHeight - 30);
     thePlayer->setRotation(0);

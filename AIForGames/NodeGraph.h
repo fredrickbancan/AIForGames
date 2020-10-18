@@ -2,7 +2,7 @@
 #include "raymath.h"
 #include "AABB.h"
 #include <vector>
-
+#include <list>
 struct NavNode
 {
 	NavNode* linkTop = nullptr;
@@ -23,7 +23,7 @@ private:
 	float nodeSpacing = 0.0F;
 	
 	NavNode* nodes;//array of all nodes
-
+	bool* closedList;//bool array for use as a closed list when finding path
 	/*returns nearest node at the provided coordinates*/
 	NavNode* getNodeAt(int x, int y);
 
@@ -34,11 +34,20 @@ private:
 	  a node can be navigated to or not.*/
 	bool doesNodeHaveNeighbor(NavNode* node);
 
-	/*resets all the prevNavNode pointers and pathCost values to their defaults*/
-	void resetNodes();
+	/*resets all the prevNavNode pointers and pathCost values to their defaults,
+	  also resets the closedList booleans*/
+	void prepareNodesForPath();
+
+	/*returns the index of the provided nav node*/
+	int getIndexOfNode(NavNode* node);
+
+	/*takes in one of the links to the current node being processed in the path find and
+	  determines if it has been visited and has a shorter path cost, and can add it to the
+	  open list*/
+	void processNodeLinkForPath(NavNode* currentNode, NavNode* connection, std::list<NavNode*>& openList);
 public:
 	NodeGraph(int nodesWide, int nodesHight, float nodeSpacing);
-	~NodeGraph() { delete[] nodes; }
+	~NodeGraph() { delete[] nodes; delete[] closedList; }
 
 	/*Links all the nodes depending on if they can connect without a wall in the way*/
 	void linkNodes();
@@ -54,6 +63,8 @@ public:
 	/*renders all the nodes as small squares, and their connections as lines.
 	  Node closest to provided player position will be colored gold.*/
 	void debugDrawNodes(Vector2 playerPos);
+
+	
 
 	int getCount() { return nodesWidth * nodesHeight; };
 };
