@@ -189,7 +189,7 @@ void processNodeLinkForPath(NavNode* currentNode, NavNode* connection, std::list
 		openList.push_back(connection);
 	}
 }
-
+//TODO: fix slow path computations.
 NavNode** NodeGraph::getShortestPathDijkstras(Vector2 startPos, Vector2 endPos, int& pathCount)
 {
 	NavNode* startNode = getNodeAtPos(startPos.x, startPos.y);
@@ -206,6 +206,7 @@ NavNode** NodeGraph::getShortestPathDijkstras(Vector2 startPos, Vector2 endPos, 
 
 	resetNodes();//prepare nodes for finding a path
 
+	//TODO: TO BE REPLACED WITH BOOL ARRAYS
 	std::list<NavNode*> openList;//to be used as priority queue
 	std::list<NavNode*> closedList;//to be used as priority queue
 
@@ -217,6 +218,12 @@ NavNode** NodeGraph::getShortestPathDijkstras(Vector2 startPos, Vector2 endPos, 
 
 		NavNode* currentNode = openList.front();//get the first node in queue and remove from open list
 		openList.pop_front();
+
+		//stop all path finding apon reaching end node
+		if (currentNode == endNode)
+		{
+			break;
+		}
 
 		closedList.push_back(currentNode);
 
