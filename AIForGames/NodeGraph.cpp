@@ -86,7 +86,7 @@ NavNode* NodeGraph::getNodeAtPos(float x, float y)
 
 	return bestNodeResult;
 }
-//TODO: FIX, nodes cannot connect in negative directions, intersection tests always return true :(
+
 void NodeGraph::linkNodes()
 {
 	NavNode* nodeA = nullptr;

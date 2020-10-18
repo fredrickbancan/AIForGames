@@ -536,12 +536,12 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
         if (ray.direction.y < 0)//if ray pointing down
         { 
             //ray must start above or inside the box and the distance from ray origin to box must be shorter than length
-            if ((ray.origin.y > box.minBounds.y) && (box.maxBounds.y - ray.origin.y < ray.length))
+            if ((ray.origin.y > box.minBounds.y) && (ray.origin.y - box.maxBounds.y < ray.length))
             {
                 if (hitLocation != nullptr)
                 {
                     hitLocation->x = ray.origin.x;
-                    hitLocation->y = ray.origin.y - (box.maxBounds.y - ray.origin.y);
+                    hitLocation->y = ray.origin.y - (ray.origin.y - box.maxBounds.y);
                 }
                 return true;
             }
@@ -573,11 +573,11 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
         if (ray.direction.x < 0)//if ray pointing left
         {
             //ray must start to right or inside the box and the distance from ray origin to box must be shorter than length
-            if ((ray.origin.x > box.minBounds.x) && (box.maxBounds.x - ray.origin.x < ray.length))
+            if ((ray.origin.x > box.minBounds.x) && (ray.origin.x - box.maxBounds.x < ray.length))
             {
                 if (hitLocation != nullptr)
                 {
-                    hitLocation->x = ray.origin.x - (box.maxBounds.x - ray.origin.x);
+                    hitLocation->x = ray.origin.x - (ray.origin.x - box.maxBounds.x);
                     hitLocation->y = ray.origin.y;
                 }
                 return true;
@@ -587,7 +587,7 @@ bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
         else
         {
             //ray must start to left or inside the box and the distance from ray origin to box must be shorter than length
-            if ((ray.origin.x < box.maxBounds.x) && (box.minBounds.x - ray.origin.x <= ray.length))
+            if ((ray.origin.x < box.maxBounds.x) && (box.minBounds.x - ray.origin.x < ray.length))
             {
                 if (hitLocation != nullptr)
                 {
