@@ -114,29 +114,30 @@ Ray2D Guard::getDetectorRay()
 void Guard::drawPath()
 {
 	if (currentPath == nullptr) return;
+	//itterate through each node in the path and draw a line
 	for (int i = currentPathCount; i > currentPathProgress + 1; i--)
 	{
 		//draw line from node to its parent
 		NavNode* current = currentPath[i - 1];
 		NavNode* next = currentPath[i - 2];
-		DrawLine(current->pos.x, current->pos.y, next->pos.x, next->pos.y, RED);
+		DrawLine((int)current->pos.x, (int)current->pos.y, (int)next->pos.x, (int)next->pos.y, RED);
 	}
 	NavNode* end = currentPath[currentPathCount - 1];
-	DrawRectangle(end->pos.x - 2, end->pos.y -2, 4, 4, RED);
+	DrawRectangle((int)(end->pos.x - 2), (int)(end->pos.y -2), 4, 4, RED);//small red recangle at end of path
 }
 
 void Guard::handleState()
 {
 	switch (currentState)
 	{
-	case GuardState::WONDERING:
+	case GuardState::WONDERING://do wondering, swap to seeking state if player is in the ray
 		doStateWondering();
 		if (doesDetectorRayHitPlayer())
 		{
 			currentState = GuardState::SEEKING;
 		}
 		break;
-	case GuardState::SEEKING:
+	case GuardState::SEEKING://do seeking state, swap to wondering state if cant get to player in time.
 		doStateSeeking();
 		if (seekCantSeePlayerTicks >= maxSeekCantSeePlayerTicks)
 		{
@@ -172,6 +173,7 @@ bool Guard::doesDetectorRayHitPlayer()
 
 void Guard::doStateWondering()
 {
+	//simply randomly chosing to walk fowards, rotate left or rotate right.
 	if (rand() % 200 == 0)
 	{
 		walkingFowards = true;

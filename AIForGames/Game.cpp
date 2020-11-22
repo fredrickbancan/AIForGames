@@ -39,7 +39,7 @@ void Game::close()
 Game::Game()
 {
     ticksAndFps = new TicksAndFPS(30);
-    ticksSinceGameEndNeededToRestart = ticksAndFps->getNumOfTicksForSeconds(3);
+    ticksSinceGameEndNeededToRestart = (int)ticksAndFps->getNumOfTicksForSeconds(3);
     thePlayer = new Player(30, screenHeight - 30, 0);
     playerController = PlayerController::get();
     guards = new Guard[guardCount];
@@ -215,7 +215,7 @@ void Game::drawScene()
     if (drawDebug)
     {
         //DEBUG front vector line
-        DrawLine(playerLerpPos.x, playerLerpPos.y, playerLerpPos.x + thePlayer->getLerpFrontVec().x * 50, playerLerpPos.y + thePlayer->getLerpFrontVec().y * 50, DARKGREEN);
+        DrawLine((int)playerLerpPos.x, (int)playerLerpPos.y, (int)(playerLerpPos.x + thePlayer->getLerpFrontVec().x * 50), (int)(playerLerpPos.y + thePlayer->getLerpFrontVec().y * 50), DARKGREEN);
         //DEBUG aabb box
         drawAABB(*thePlayer->getAABB(), false);
 
@@ -251,11 +251,11 @@ void Game::drawAABB(AABB box, bool wall)
 {
     if (wall)
     {
-        DrawRectangle(box.minBounds.x, box.minBounds.y, box.maxBounds.x - box.minBounds.x, box.maxBounds.y - box.minBounds.y, BLACK);
+        DrawRectangle((int)box.minBounds.x, (int)box.minBounds.y, (int)(box.maxBounds.x - box.minBounds.x), (int)(box.maxBounds.y - box.minBounds.y), BLACK);
     }
     else
     {
-        DrawRectangleLines(box.minBounds.x, box.minBounds.y, box.maxBounds.x - box.minBounds.x, box.maxBounds.y - box.minBounds.y, MAGENTA);
+        DrawRectangleLines((int)box.minBounds.x, (int)box.minBounds.y, (int)(box.maxBounds.x - box.minBounds.x), (int)(box.maxBounds.y - box.minBounds.y), MAGENTA);
     }
 }
 
@@ -339,7 +339,7 @@ float Game::lerp(float start, float dest)
 
 int Game::getNumOfTicksForSeconds(int seconds)
 {
-    return ticksAndFps->getNumOfTicksForSeconds(seconds);
+    return (int)ticksAndFps->getNumOfTicksForSeconds((float)seconds);
 }
 
 bool Game::doesRayHitWallOrPlayer(Ray2D ray, Vector2* hitLocation)
@@ -373,7 +373,7 @@ bool Game::doesRayHitWallOrPlayer(Ray2D ray, Vector2* hitLocation)
     //find closest hit position and assign it to hitPos, then assign hitPos to the result hitLocation
     if (intersection && hitLocation != nullptr)
     {
-        float currentDistance = INT32_MAX; 
+        float currentDistance = (float)INT32_MAX; 
         float testDistance = 0;
         for (std::vector<Vector2>::const_iterator vec = wallHitPositions.begin(); vec != wallHitPositions.end(); vec++)
         {
@@ -413,7 +413,7 @@ bool Game::doesRayHitWall(Ray2D ray, Vector2* hitLocation)
     //find closest hit position and assign it to hitPos, then assign hitPos to the result hitLocation
     if (intersection && hitLocation != nullptr)
     {
-        float currentDistance = INT32_MAX;
+        float currentDistance = (float)INT32_MAX;
         float testDistance = 0;
         for (std::vector<Vector2>::const_iterator vec = wallHitPositions.begin(); vec != wallHitPositions.end(); vec++)
         {
@@ -502,23 +502,14 @@ void Game::loadGuardsAndResetGame()
     gameWon = false;
     gameLost = false;
     ticksSinceGameEnd = 0;
+    //configure all guards randomly for each game reload
     for (int i = 0; i < guardCount; i++)
     {
         guards[i] = Guard((float)(screenWidth - 20 - (rand() % (screenWidth - 20))), (float)(rand() % (screenHeight - 40)) + 20.0F, (float)(rand() % 360));
-        guards[i].setMaxSeekCantSeePlayerTicks(ticksAndFps->getNumOfTicksForSeconds((rand()%30) + 20));//randomly set chasing persistance of guard to a range from 20 seconds to 30 seconds
+        guards[i].setMaxSeekCantSeePlayerTicks((int)ticksAndFps->getNumOfTicksForSeconds((float)((rand()%30) + 20)));//randomly set chasing persistance of guard to a range from 20 seconds to 30 seconds
     }
-    thePlayer->setPos(30, screenHeight - 30);
+    thePlayer->setPos(30, screenHeight - 30);//put the player at the starting pos
     thePlayer->setRotation(0);
-}
-
-Vector2 Game::getClosestPointOnRay(Ray2D ray, Vector2 testPoint)
-{
-    float rayLength = Vector2Length(ray.direction);
-    Vector2 rayDirection = Vector2Normalize(ray.direction);
-    Vector2 vecFromRayOriginToTestPoint = Vector2Subtract(testPoint, ray.origin);
-    float dotProduct = Vector2DotProduct(vecFromRayOriginToTestPoint, rayDirection);
-    float dotClamped = Clamp(dotProduct, 0, rayLength);
-    return Vector2Scale(rayDirection, dotClamped);
 }
 
 bool Game::intersecting(Ray2D ray, AABB box, Vector2* hitLocation /*= nullptr*/)
@@ -662,11 +653,11 @@ void Game::drawRayHittingWallsOrPlayer(Ray2D ray)
     Vector2 wallHitPos{};
     if (doesRayHitWallOrPlayer(ray, &wallHitPos))
     {
-        DrawLine(ray.origin.x, ray.origin.y, wallHitPos.x, wallHitPos.y, RED);
+        DrawLine((int)ray.origin.x, (int)ray.origin.y, (int)wallHitPos.x, (int)wallHitPos.y, RED);
     }
     else
     {
-        DrawLine(ray.origin.x, ray.origin.y, ray.origin.x + ray.direction.x * ray.length, ray.origin.y + ray.direction.y * ray.length, RED);
+        DrawLine((int)ray.origin.x, (int)ray.origin.y, (int)(ray.origin.x + ray.direction.x * ray.length), (int)(ray.origin.y + ray.direction.y * ray.length), RED);
     }
 }
  

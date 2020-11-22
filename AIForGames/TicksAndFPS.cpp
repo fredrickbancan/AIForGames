@@ -32,7 +32,7 @@ void TicksAndFPS::updateFPS()
 
 void TicksAndFPS::doOnTickUntillRealtimeSync(class Game* instance)
 {
-    if (paused)
+    if (paused)//if paused then just update timer without doing ontick
     {
         while ((applicationTime + msPerTick) < getRealTimeMS())
         {
@@ -40,6 +40,7 @@ void TicksAndFPS::doOnTickUntillRealtimeSync(class Game* instance)
         }
         return;
     }
+    //run ontick and update timer untill caught up with realtime
     while ((applicationTime + msPerTick) < getRealTimeMS())
     {
         instance->onTick();

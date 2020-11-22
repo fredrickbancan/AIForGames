@@ -41,7 +41,7 @@ public:
 	float getLerpRotation() const;//returns the rotation of this entity linearly interpolated between ticks
 
 	Vector2 getFrontVec() const { return frontVector; }
-	Vector2 getLerpFrontVec() const;
+	Vector2 getLerpFrontVec() const;//returns the front vector of this entity, interpolated between ticks.
 
 	AABB* getAABB() { return &boundingBox; };
 };

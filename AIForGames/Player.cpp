@@ -21,7 +21,7 @@ void Player::onTick()
 		rotation -= rotationSpeed;
 	}
 	//front and backwards movement
-	float frontBackMove = (int)pc->doingAction(PlayerAction::WALKFOWARDS) - (int)pc->doingAction(PlayerAction::WALKBACKWARDS);	
+	float frontBackMove = float((int)pc->doingAction(PlayerAction::WALKFOWARDS) - (int)pc->doingAction(PlayerAction::WALKBACKWARDS));	
 	acel.y += frontVector.y * frontBackMove * moveAcel;
 	acel.x += frontVector.x * frontBackMove * moveAcel;
 	//END MOVEMENT

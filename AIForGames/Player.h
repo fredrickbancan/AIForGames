@@ -1,5 +1,6 @@
 #pragma once
 #include "EntityLiving.h"
+//simple player class which just extends entityliving
 class Player : public EntityLiving
 {
 public:
