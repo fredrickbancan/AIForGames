@@ -82,11 +82,11 @@ NavNode* NodeGraph::getNodeAtPos(float x, float y)
 {
 	NavNode* bestNodeResult = nullptr;
 	//testing closest node to see if it is valid (if it can be navigated to), otherwise, find closest valid node
-	bestNodeResult = getNodeAt(roundf(x / nodeSpacing), roundf(y / nodeSpacing));
+	bestNodeResult = getNodeAt((int)roundf(x / nodeSpacing), (int)roundf(y / nodeSpacing));
 	
 	if (!doesNodeHaveNeighbor(bestNodeResult))//if the current result isnt valid
 	{
-		bestNodeResult = getNodeAt(roundf(x / nodeSpacing) - 1, roundf(y / nodeSpacing));//try the node to the left
+		bestNodeResult = getNodeAt((int)roundf(x / nodeSpacing) - 1, (int)roundf(y / nodeSpacing));//try the node to the left
 	}
 
 	return bestNodeResult;
@@ -246,33 +246,34 @@ NavNode** NodeGraph::getShortestPathDijkstras(Vector2 startPos, Vector2 endPos, 
 
 void NodeGraph::debugDrawNodes(Vector2 playerPos)
 {
+	//loop through each node and draw lines to their connected neighbors
 	for (int i = 0; i < (nodesWidth * nodesHeight); i++)
 	{
 		NavNode* currentNode = &nodes[i];
 		
 		if (currentNode->linkTop != nullptr)
 		{
-			DrawLine(currentNode->pos.x - 1, currentNode->pos.y, currentNode->pos.x - 1, currentNode->pos.y + nodeSpacing, DARKPURPLE);
+			DrawLine((int)(currentNode->pos.x - 1), (int)currentNode->pos.y, (int)(currentNode->pos.x - 1), (int)(currentNode->pos.y + nodeSpacing), DARKPURPLE);
 		}
 		if (currentNode->linkRight != nullptr)
 		{
-			DrawLine(currentNode->pos.x, currentNode->pos.y - 1, currentNode->pos.x + nodeSpacing, currentNode->pos.y - 1, DARKPURPLE);
+			DrawLine((int)currentNode->pos.x, (int)(currentNode->pos.y - 1), (int)(currentNode->pos.x + nodeSpacing), (int)(currentNode->pos.y - 1), DARKPURPLE);
 		}
 		if (currentNode->linkBottom != nullptr)
 		{
-			DrawLine(currentNode->pos.x + 1, currentNode->pos.y, currentNode->pos.x + 1, currentNode->pos.y - nodeSpacing, DARKGREEN);
+			DrawLine((int)(currentNode->pos.x + 1), (int)currentNode->pos.y, (int)(currentNode->pos.x + 1), (int)(currentNode->pos.y - nodeSpacing), DARKGREEN);
 		}
 		if (currentNode->linkLeft != nullptr)
 		{
-			DrawLine(currentNode->pos.x, currentNode->pos.y + 1, currentNode->pos.x - nodeSpacing, currentNode->pos.y + 1, DARKGREEN);
+			DrawLine((int)currentNode->pos.x, (int)(currentNode->pos.y + 1), (int)(currentNode->pos.x - nodeSpacing), (int)(currentNode->pos.y + 1), DARKGREEN);
 		}
 		if (getNodeAtPos(playerPos.x, playerPos.y) == currentNode)
 		{
-			DrawRectangle(currentNode->pos.x - 2, currentNode->pos.y - 2, 4, 4, GOLD);
+			DrawRectangle((int)(currentNode->pos.x - 2), (int)(currentNode->pos.y - 2), 4, 4, GOLD);
 		}
 		else
 		{
-			DrawRectangle(currentNode->pos.x - 2, currentNode->pos.y - 2, 4, 4, DARKGREEN);
+			DrawRectangle((int)(currentNode->pos.x - 2), (int)(currentNode->pos.y - 2), 4, 4, DARKGREEN);
 		}
 	}
 }

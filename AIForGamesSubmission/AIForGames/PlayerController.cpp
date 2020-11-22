@@ -1,7 +1,7 @@
 #include "PlayerController.h"
 
 PlayerController* PlayerController::instance = nullptr;
-PlayerController* PlayerController::get()
+PlayerController* PlayerController::get()//singleton getter
 {
 	if (instance == nullptr)
 	{
@@ -17,7 +17,7 @@ void PlayerController::close()
 
 void PlayerController::addAction(PlayerAction act)
 {
-	actions[(int)act] = true;
+	actions[(int)act] = true;//if the boolean in the array at the action index is true, then that action is being done.
 }
 
 void PlayerController::addActIfKeyDown(KeyboardKey key, PlayerAction act)
@@ -52,5 +52,5 @@ void PlayerController::update()
 
 bool PlayerController::doingAction(PlayerAction act)
 {
-	return actions[(int)act];
+	return actions[(int)act];//if the boolean in the array at the action index is true, then that action is being done.
 }

@@ -39,9 +39,6 @@ private:
 	/*when called loads all the guards to be new with random positions
 	  also resets player and game state*/
 	void loadGuardsAndResetGame();
-
-	/*Returns a position vector along the ray closest to the provided point*/
-	Vector2 getClosestPointOnRay(struct Ray2D ray, Vector2 testPoint);
 	
 	/*draws the provided ray, if it hits a wall, draws it up to where it hits the wall.*/
 	void drawRayHittingWallsOrPlayer(struct Ray2D ray);

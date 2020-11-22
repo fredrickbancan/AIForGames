@@ -22,13 +22,13 @@ void EntityLiving::onTick()
 		rotation = 360 + rotation;
 	}
 
-	rotation = fmodf(rotation, 360.0F);
+	rotation = fmodf(rotation, 360.0F);//keeping rotation value within 360 degrees
 	prevRotation = rotation;
 	prevFrontvector = frontVector;
 	alignFrontVector();
 	vel.x += acel.x;
 	vel.y += acel.y;
-	vel.x *= 1 - moveResistance;
+	vel.x *= 1 - moveResistance;//applying move resistance
 	vel.y *= 1 - moveResistance;
 	Game::get()->tryToMoveEntity(this, vel);
 	acel.x = 0;
